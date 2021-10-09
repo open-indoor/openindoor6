@@ -1,0 +1,11 @@
+services:
+  openindoor6:
+    # image: openindoor6
+    build: .
+    working_dir: /root/openindoor6
+    command: |
+      yarn run start
+    volumes:
+    - ./src:/root/openindoor6/src
+    ports:
+    - 3000:3000
