@@ -1,6 +1,8 @@
+// For cache
 const path = require("path")
 const fs = require('fs');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+// const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 // App directory
 const appDirectory = fs.realpathSync(process.cwd());
@@ -8,7 +10,7 @@ const appDirectory = fs.realpathSync(process.cwd());
 // Gets absolute path of file within app directory
 const resolveAppPath = relativePath => path.resolve(appDirectory, relativePath);
 // Host
-const host = process.env.HOST || 'localhost';
+// const host = process.env.HOST || 'localhost';
 
 // Required for babel-preset-react-app
 process.env.NODE_ENV = 'development';
@@ -18,20 +20,53 @@ module.exports = {
     output: {
         path: path.resolve(__dirname, "dist"),
         filename: "main.js",
-        library: "$",
+        // library: "$",
         libraryTarget: "umd",
     },
+    // output: {
+    //     filename: '[name].[chunkhash].js',
+    //     path: path.resolve(__dirname, 'dist')
+    // },
     module: {
         rules: [{
-            test: /\.(js)$/,
-            exclude: /node_modules/,
-            loader: "babel-loader",
-        }, ],
+                test: /\.(js)$/,
+                exclude: /node_modules/,
+                loader: "babel-loader",
+            },
+            {
+                test: /\.css$/i,
+                use: ["style-loader", "css-loader"],
+                // options: {
+                //     modules: {
+                //         auto: true,
+                //     },
+                // },
+            },
+            // {
+            //     test: /\.sc|ass$/,
+            //     use: [
+            //         { loader: "css-loader" },
+            //         { loader: "sass-loader" }
+            //     ]
+            // },
+            // {
+            //     test: /\.sc|ass$/,
+            //     use: [
+            //         { loader: "css-loader" },
+            //         { loader: "sass-loader" }
+            //     ]
+            // },
+            // {
+            //     test: /\.(ico|gif|png|jpe?g|svg)$/i,
+            //     use: [
+            //         'file-loader',
+            //         { loader: 'image-webpack-loader' },
+            //     ],
+            // },
+        ],
     },
-    mode: "development",
+    // mode: env || 'development', // on définit le mode en fonction de la valeur de NODE_ENV
     devServer: {
-        // Serve index.html as the base
-        // contentBase: resolveAppPath('public'),
         client: {
             progress: true,
             logging: 'info',
@@ -39,23 +74,36 @@ module.exports = {
 
         },
         static: './dist',
-        // Enable compression
         compress: true,
-        // Enable hot reloading
+        allowedHosts: [
+            'app-dev.openindoor.io',
+            'localhost',
+        ],
         hot: true,
         port: 3000,
-        // Public path is root of content base
-        // publicPath: '/',
+        // headers: {
+        //     "Access-Control-Allow-Origin": "*",
+        //     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+        //     "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization"
+        // }
     },
     devtool: 'inline-source-map',
     plugins: [
         // Re-generate index.html with injected script tag.
         // The injected script tag contains a src value of the
         // filename output defined above.
+        // new CleanWebpackPlugin('dist/*.*', {}), // supprime tous les fichiers du répertoire dist sans pour autant supprimer ce dossier
+
+        // new HtmlWebpackPlugin({
+        //     // inject: true,
+        //     // template: resolveAppPath('public/index.html'),
+        //     title: 'Development',
+        // }),
         new HtmlWebpackPlugin({
-            // inject: true,
-            // template: resolveAppPath('public/index.html'),
-            title: 'Development',
-        }),
+            inject: true,
+            // hash: true,
+            template: './public/index.html',
+            // filename: 'index.html'
+        })
     ],
 }

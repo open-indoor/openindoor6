@@ -5,7 +5,13 @@ services:
     working_dir: /root/openindoor6
     command: |
       yarn run start
+      
     volumes:
     - ./src:/root/openindoor6/src
+    - ./dist:/root/openindoor6/dist
+    - ./webpack.config.js:/root/openindoor6/webpack.config.js
+    - ./package.json:/root/openindoor6/package.json
+    - ./public:/root/openindoor6/public
+    - ./.babel.rc:/root/openindoor6/.babel.rc
     ports:
     - 3000:3000

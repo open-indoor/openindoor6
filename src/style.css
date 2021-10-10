@@ -1,0 +1,27 @@
+html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    border: none;
+    background-color: #222;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    border: none;
+    background-color: #222;
+}
+
+#map {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: transparent;
+    height: 100%;
+    width: 100%;
+    opacity: 1;
+}
