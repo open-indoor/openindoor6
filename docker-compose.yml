@@ -15,3 +15,4 @@ services:
     - ./.babel.rc:/root/openindoor6/.babel.rc
     ports:
     - 3000:3000
+    

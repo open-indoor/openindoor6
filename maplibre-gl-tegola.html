@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Tegola vector tiles usage</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <script src="https://unpkg.com/maplibre-gl@1.14.0/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@1.14.0/dist/maplibre-gl.css" rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        mapStyle = {
+            "version": 8,
+            "name": "Blank",
+            "center": [0, 0],
+            "zoom": 0,
+            "sources": {
+                "raster-tiles": {
+                    "type": "raster",
+                    "tiles": [
+                        "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                        "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                        "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    ],
+                    "tileSize": 256,
+                    "minzoom": 0,
+                    "maxzoom": 19
+                }
+            },
+            "sprite": "https://open-indoor.github.io/sprite/sprite",
+            "glyphs": "https://open-indoor.github.io/fonts/{fontstack}/{range}.pbf",
+            "layers": [{
+                "id": "background",
+                "type": "background",
+                "paint": {
+                    "background-color": "rgba(255,255,255,1)"
+                }
+            }, {
+                "id": "simple-tiles",
+                "type": "raster",
+                "source": "raster-tiles",
+                "minzoom": 0,
+                "maxzoom": 19,
+                "raster-opacity": [
+                    "interpolate", ["linear"],
+                    ["zoom"],
+                    18,
+                    1,
+                    19,
+                    0
+                ]
+            }],
+            "id": "blank"
+        }
+
+        // mapboxgl.accessToken = '';
+        let map = new maplibregl.Map({
+            'container': 'map',
+            'center': [2.36186, 48.87805],
+            'pitch': 60, // pitch in degrees
+            'bearing': -60, // bearing in degrees
+            'zoom': 17,
+            'style': mapStyle
+        });
+
+        map.on('click', 'fire', function(e) {
+            console.log(e.features[0].properties);
+
+            new maplibregl.Popup()
+                .setLngLat(e.lngLat)
+                .setHTML(e.features[0].properties.name)
+                .addTo(map);
+        });
+
+        map.addControl(new maplibregl.NavigationControl());
+        map.addControl(new maplibregl.FullscreenControl());
+
+        map.on('sourcedata', function() {
+            let sourceId = "openindoor"
+            if (map.getSource(sourceId) && map.isSourceLoaded(sourceId)) {
+                console.log('sourceId:', sourceId);
+                const features = map.querySourceFeatures(sourceId, {
+                    sourceLayer: 'building',
+                });
+                console.log('openindoor features loaded:', features);
+            }
+        });
+
+        map.on('load', function() {
+
+            map.addSource('openindoor', {
+                'type': 'vector',
+                "tiles": ["https://tegola.openindoor.io/maps/openindoor/{z}/{x}/{y}.vector.pbf?token=kjGxKVMZcXAao1mtOOALxWY3"],
+                "tolerance": 0
+            });
+            // map.addLayer({
+            //     "id": "building",
+            //     "source": "openindoor",
+            //     "source-layer": "building",
+            //     "type": "line",
+            //     "paint": {
+            //         "line-color": "#000000",
+            //         "line-width": 1
+            //     }
+            // });
+
+            // map.addLayer({
+            //     // "id": "building-part-extrusion",
+            //     "id": "buildings",
+            //     "source": "openindoor",
+            //     "source-layer": "buildings",
+            //     "type": "fill-extrusion",
+            //     "filter": [
+            //         "all",
+            //         [
+            //             "==",
+            //             [
+            //                 "geometry-type"
+            //             ],
+            //             "Polygon"
+            //         ],
+            //         // [
+            //         //     "any",
+            //         //     [
+            //         //         "has",
+            //         //         "building"
+            //         //     ]
+            //         // ]
+            //     ],
+            //     "paint": {
+            //         "fill-extrusion-color": "#fcffe4",
+            //         "fill-extrusion-height": 40,
+            //         "fill-extrusion-base": 0,
+            //         "fill-extrusion-opacity": 0.5
+            //     }
+            // })
+            fetch("/style/buildingLayers.json").then(function(response) {
+                return response.json().then(function(json) {
+                    layers = json
+                    for (layer of layers) {
+                        layer['source'] = 'openindoor'
+                        layer['source-layer'] = 'footprint'
+                        map.addLayer(layer)
+                    }
+                });
+            });
+            fetch("/style/shapeLayers.json").then(function(response) {
+                return response.json().then(function(json) {
+                    layers = json
+                    for (layer of layers) {
+                        layer['source'] = 'openindoor'
+                        layer['source-layer'] = 'indoor'
+                        map.addLayer(layer)
+                    }
+                });
+            });
+            fetch("/style/indoorLayers.json").then(function(response) {
+                return response.json().then(function(json) {
+                    layers = json
+                    for (layer of layers) {
+                        layer['source'] = 'openindoor'
+                        layer['source-layer'] = 'indoor'
+                        map.addLayer(layer)
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>
