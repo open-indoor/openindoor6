@@ -11,8 +11,13 @@
     "keywords": [],
     "author": "OpenIndoor",
     "license": "GPL-3.0-or-later",
+    "peerDependencies": {
+        "maplibre-gl": "1.15.2"
+    },
     "dependencies": {
-        "maplibre-gl": ">=1.15.2"
+        "osmtogeojson": "",
+        "@turf/turf": "",
+        "@maplibre/maplibre-gl-geocoder": "1.2.0"
     },
     "devDependencies": {
         "@babel/core": "^7.15.8",

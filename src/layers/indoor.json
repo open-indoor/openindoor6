@@ -1,0 +1,223 @@
+[{
+    "id": "indoor-id",
+    "type": "symbol",
+    "source": "indoor_source",
+    "minzoom": 17,
+    "interactive": true,
+    "filter": [
+        "any", [
+            "has",
+            "name"
+        ]
+    ],
+    "layout": {
+        "text-line-height": 1.2,
+        "icon-size": {
+            "base": 1,
+            "stops": [
+                [
+                    17,
+                    0.5
+                ],
+                [
+                    20,
+                    1
+                ]
+            ]
+        },
+        "text-size": {
+            "base": 1,
+            "stops": [
+                [
+                    17,
+                    11
+                ],
+                [
+                    20,
+                    13
+                ]
+            ]
+        },
+        "text-allow-overlap": false,
+        "icon-image": "",
+        "icon-anchor": "center",
+        "text-ignore-placement": false,
+        "text-max-angle": 38,
+        "symbol-spacing": 250,
+        "text-font": [
+            "Open Sans Regular"
+        ],
+        "symbol-placement": "point",
+        "text-padding": 2,
+        "visibility": "visible",
+        "text-offset": [
+            0,
+            1
+        ],
+        "icon-optional": false,
+        "text-rotation-alignment": "viewport",
+        "text-anchor": "top",
+        "text-field": "{name}",
+        "text-letter-spacing": 0.02,
+        "text-max-width": 8,
+        "icon-allow-overlap": true
+    },
+    "paint": {
+        "text-color": "#65513d",
+        "text-halo-color": "#ffffff",
+        "text-halo-width": 1,
+        "text-opacity": 1
+    }
+}, {
+    "id": "indoor-id-ref",
+    "type": "symbol",
+    "source": "indoor_source",
+    "minzoom": 17,
+    "interactive": true,
+    "filter": [
+        "any", [
+            "has",
+            "ref"
+        ]
+    ],
+    "layout": {
+        "text-line-height": 1.2,
+        "icon-size": {
+            "base": 1,
+            "stops": [
+                [
+                    17,
+                    0.5
+                ],
+                [
+                    20,
+                    1
+                ]
+            ]
+        },
+        "text-size": {
+            "base": 1,
+            "stops": [
+                [
+                    17,
+                    11
+                ],
+                [
+                    20,
+                    13
+                ]
+            ]
+        },
+        "text-allow-overlap": false,
+        "icon-image": "",
+        "icon-anchor": "center",
+        "text-ignore-placement": false,
+        "text-max-angle": 38,
+        "symbol-spacing": 250,
+        "text-font": [
+            "Open Sans Regular"
+        ],
+        "symbol-placement": "point",
+        "text-padding": 2,
+        "visibility": "visible",
+        "text-offset": [
+            0,
+            1
+        ],
+        "icon-optional": false,
+        "text-rotation-alignment": "viewport",
+        "text-anchor": "top",
+        "text-field": "{ref}",
+        "text-letter-spacing": 0.02,
+        "text-max-width": 8,
+        "icon-allow-overlap": true
+    },
+    "paint": {
+        "text-color": "#65513d",
+        "text-halo-color": "#ffffff",
+        "text-halo-width": 1,
+        "text-opacity": 1
+    }
+}, {
+    "id": "indoor-tag",
+    "source": "indoor_source",
+    "minzoom": 17,
+    "filter": [
+        "all", [
+            "has",
+            "indoor"
+        ]
+    ],
+    "type": "line",
+    "paint": {
+        "line-opacity": 0,
+        "line-color": [
+            "case", [
+                "==", [
+                    "feature-state",
+                    "hover"
+                ],
+                null
+            ],
+            [
+                "match", ["%", ["id"], 4],
+                0, "#ea4234",
+                1, "#fabc05",
+                2, "#34a853",
+                "#4286f4"
+            ],
+            [
+                "boolean", [
+                    "feature-state",
+                    "hover"
+                ]
+            ],
+            "white", [
+                "match", ["%", ["id"], 4],
+                0, "#ea4234",
+                1, "#fabc05",
+                2, "#34a853",
+                "#4286f4"
+            ]
+        ],
+        "line-width": 5
+    }
+}, {
+    "id": "indoor-extrusion",
+    "source": "indoor_source",
+    "minzoom": 17,
+    "filter": [
+        "all", [
+            "has",
+            "indoor"
+        ]
+    ],
+    "type": "fill-extrusion",
+    "paint": {
+        "fill-extrusion-opacity": 0.8,
+        "fill-extrusion-color": [
+            "match", ["%", ["id"], 4],
+            0, "#ea4234",
+            1, "#fabc05",
+            2, "#34a853",
+            "#4286f4"
+        ],
+        "fill-extrusion-height": 0
+    }
+}, {
+    "id": "not-indoor-tag",
+    "source": "indoor_source",
+    "minzoom": 17,
+    "type": "line",
+    "paint": {
+        "line-opacity": 0,
+        "line-color": [
+            "match", ["%", ["id"], 4],
+            0, "#ea4234",
+            1, "#fabc05",
+            2, "#34a853",
+            "#4286f4"
+        ],
+        "line-width": 5
+    }
+}]

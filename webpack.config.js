@@ -27,11 +27,27 @@ module.exports = {
     //     filename: '[name].[chunkhash].js',
     //     path: path.resolve(__dirname, 'dist')
     // },
+    // externals: {
+    //     react: 'react',
+    //     reactDOM: 'react-dom'
+    // },
+
+    // module.exports = {
+    //...
+    externals: {
+        'maplibre-gl': 'maplibregl',
+    },
+    //   };
     module: {
+
         rules: [{
                 test: /\.(js)$/,
                 exclude: /node_modules/,
                 loader: "babel-loader",
+            },
+            {
+                test: /\.svg$/,
+                loader: 'svg-inline-loader'
             },
             {
                 test: /\.css$/i,
@@ -73,6 +89,7 @@ module.exports = {
             overlay: true,
 
         },
+        webSocketServer: false,
         static: './dist',
         compress: true,
         allowedHosts: [
@@ -80,7 +97,7 @@ module.exports = {
             'localhost',
         ],
         hot: true,
-        port: 3000,
+        port: 3040,
         // headers: {
         //     "Access-Control-Allow-Origin": "*",
         //     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",

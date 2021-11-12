@@ -14,4 +14,4 @@ services:
     - ./public:/root/openindoor6/public
     - ./.babel.rc:/root/openindoor6/.babel.rc
     ports:
-    - 3000:3000
+    - 3040:3040
