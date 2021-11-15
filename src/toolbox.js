@@ -1,3 +1,5 @@
+import centroid from '@turf/centroid';
+
 class toolbox {
     static regex1 = /^-?\d+(?:\.\d+)?(?:;-?\d+(?:\.\d+)?)*$/;
     static regex3 = /^(-?\d+)-(-?\d+)$/;
@@ -30,6 +32,7 @@ class toolbox {
                 result[i] = parseFloat(result[i]);
             }
             result.sort(toolbox.sortNumberArray);
+            // console.log('result:', result)
         }
         //Level intervals
         else {
@@ -38,11 +41,16 @@ class toolbox {
             var max = null;
 
             //Level values (only integers) in an interval, bounded with '-'
-
             if (toolbox.regex3.test(str)) {
                 regexResult = toolbox.regex3.exec(str);
                 min = parseInt(regexResult[1]);
+                // if (isNaN(min)) {
+                // console.log('min:', min)
+                // }
                 max = parseInt(regexResult[2]);
+                // if (isNaN(max)) {
+                // console.log('max:', max)
+                // }
             }
 
             //Add values between min and max
@@ -58,6 +66,9 @@ class toolbox {
                 for (var i = min; i != max; i = i + ((max - min) / Math.abs(max - min))) {
                     result.push(i);
                 }
+                // if (max === NaN) {
+                //     console.log('max:', str)
+                // }
                 result.push(max);
             }
         }
@@ -71,10 +82,26 @@ class toolbox {
         let new_features = [];
 
         for (let feature of geojson.features) {
+            if (feature.properties === undefined)
+                continue;
+            if (feature.properties === null)
+                feature.properties = {};
+            // console.log('feature:', feature);
+            if (!('tags' in feature.properties))
+                continue;
+            for (const [key, value] of Object.entries(feature.properties.tags)) {
+                feature.properties[key] = value;
+            }
+        }
+
+        for (let feature of geojson.features) {
             count++;
             if (!('properties' in feature))
                 continue
-                // console.log('count:', count)
+            if (feature.properties === null)
+                feature.properties = {};
+
+            // console.log('count:', count)
             if ('repeat_on' in feature.properties) {
                 let levels = toolbox.parseLevelsFloat(feature.properties.repeat_on);
                 // console.log('repeat on levels:', levels)
@@ -96,8 +123,15 @@ class toolbox {
 
         // min_level/max_level tag
         for (let feature of geojson.features) {
+            if (feature.properties === null)
+                feature.properties = {};
             if ('level' in feature.properties) {
                 let levels = toolbox.parseLevelsFloat(feature.properties.level);
+                // console.log('levels:', levels)
+                if (levels === null) {
+                    console.log('feature.properties.level:', feature.properties.level)
+                    continue
+                }
                 feature.properties.min_level = levels[0];
                 feature.properties.max_level = levels[levels.length - 1];
             } else {
@@ -109,6 +143,7 @@ class toolbox {
         // building level gap
         let building_min_level = 0
         for (let feature of geojson.features) {
+
             building_min_level = Math.min(
                 building_min_level,
                 feature.properties.min_level
@@ -136,6 +171,22 @@ class toolbox {
         //         // console.log('gap_level:', feature.properties.gap_level)
         // }
 
+        // let centers = [];
+        // console.log('dealing with ref')
+        // for (let feature of geojson.features.filter(
+        //         feat_ =>
+        //         'properties' in feat_ && 'ref' in feat_.properties
+        //     )) {
+        //     console.log('ref feature:', feature)
+        //     let center = centroid(feature);
+        //     center.properties = {
+        //         ref: feature.properties.ref
+        //     }
+        //     centers.push(center);
+        //     // delete feature.properties.ref;
+
+        // }
+        // geojson.features.push(...centers);
         return geojson;
     }
 

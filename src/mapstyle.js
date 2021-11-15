@@ -3,7 +3,6 @@ import raster_layers from './layers/raster.json';
 import footprint_layers from './layers/footprint.json';
 import pins_layers from './layers/pins.json';
 import shape_layers from './layers/shape.json';
-// import shape_flat_layers from './layers/shape_flat.json';
 import indoor_layers from './layers/indoor.json';
 
 function mapstyle() {
@@ -12,6 +11,12 @@ function mapstyle() {
         "name": "Blank",
         "center": [0, 0],
         "zoom": 0,
+        "light": {
+            "anchor": "map",
+            "color": "white",
+            "intensity": 0.4,
+            "position": [1.15, 210, 30]
+        },
         "sources": {
             "raster-tiles": {
                 "type": "raster",
@@ -45,14 +50,16 @@ function mapstyle() {
                 "data": {
                     "type": "FeatureCollection",
                     "features": []
-                }
+                },
+                "generateId": true,
             },
             "indoor_source": {
                 "type": "geojson",
                 "data": {
                     "type": "FeatureCollection",
                     "features": []
-                }
+                },
+                "generateId": true,
             },
             "selection": {
                 "type": "geojson",

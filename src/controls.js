@@ -1,6 +1,9 @@
 import MaplibreGeocoder from '@maplibre/maplibre-gl-geocoder';
 import '@maplibre/maplibre-gl-geocoder/dist/maplibre-gl-geocoder.css';
 
+
+
+
 var GeoApi = {
     forwardGeocode: async(config) => {
         const features = []
@@ -43,6 +46,91 @@ var geocoder = new MaplibreGeocoder(
         maplibregl: maplibregl
     }
 );
+
+
+
+class FeedbackControl {
+    constructor({
+
+    }) {
+
+    }
+
+
+    // setUpAction(up_action) {
+    //     this.up_action = up_action
+    // }
+    // setDownAction(up_action) {
+    //     this.down_action = down_action
+    // }
+
+    onAdd(map) {
+        this._map = map;
+        let self = this;
+
+        var b = document.createElement('button');
+        b.setAttribute('content', 'test content');
+        b.setAttribute('class', 'btn');
+        b.textContent = 'test value';
+
+        this._title = document.createTextNode('Give us Feedback:');
+        this._title.className = "maplibregl-ctrl-icon maplibregl-ctrl-feedback";
+        this._title.type = "button";
+        this._title["aria-label"] = "Feedback";
+
+        this._reddit = document.createElement("button");
+        this._reddit.className = "maplibregl-ctrl-icon maplibregl-ctrl-reddit";
+        // this._reddit.type = "button";
+        this._reddit["aria-label"] = "Reddit";
+
+        this._discord = document.createElement("button");
+        this._discord.className = "maplibregl-ctrl-icon maplibregl-ctrl-discord";
+        // this._discord.type = "button";
+        this._discord["aria-label"] = "Discord";
+        this._discord.style.fontSize = "72px";
+        this._discord.textContent = this._level_number;
+
+        this._linkedin = document.createElement("button");
+        this._linkedin.className = "maplibregl-ctrl-icon maplibregl-ctrl-linkedin";
+        this._linkedin.type = "button";
+        this._linkedin["aria-label"] = "LinkedIn";
+
+        this._reddit.onclick = function() {
+            window.open('https://www.reddit.com/r/OpenIndoor/', '_blank').focus();
+        }
+
+        this._discord.onclick = function() {
+            window.open('https://discord.gg/cDYF69V9', '_blank').focus();
+        };
+
+        this._linkedin.onclick = function() {
+            window.open('https://www.linkedin.com/company/openindoor/', '_blank').focus();
+        };
+
+        // this._level.onclick = function() {
+        //     self.go_indoor_action
+        // }
+
+        this._container = document.createElement("div");
+        this._container.className = "maplibregl-ctrl-group-feedback maplibregl-ctrl-group maplibregl-ctrl";
+        // this._container.className = "maplibregl-ctrl-group-feedback maplibregl-ctrl";
+        this._container.appendChild(this._title);
+        this._container.appendChild(this._reddit);
+        this._container.appendChild(this._discord);
+        this._container.appendChild(this._linkedin);
+
+        return this._container;
+    }
+
+    onRemove() {
+        this._container.parentNode.removeChild(this._container);
+        this._map = undefined;
+    }
+}
+
+
+
+
 
 class LevelControl {
     constructor({
@@ -412,10 +500,14 @@ class Controls {
         this.floor_control = new FloorControl();
         this.indoor_control = new IndoorControl();
 
+        this.feedbackControl = new FeedbackControl({})
+        map.addControl(this.feedbackControl, "top-left");
+
         this.levelControl = new LevelControl({
-                minpitchzoom: 11,
-            })
-            // map.addControl(new PitchToggle({ minpitchzoom: 11 }), "top-left");
+            minpitchzoom: 11,
+        })
+
+        // map.addControl(new PitchToggle({ minpitchzoom: 11 }), "top-left");
 
         map.addControl(geocoder, "top-right");
 
@@ -446,6 +538,9 @@ class Controls {
         map.addControl(this.building_control, "top-left");
         map.addControl(this.floor_control, "top-left");
         map.addControl(this.indoor_control, "top-left");
+
+
+
 
     }
 

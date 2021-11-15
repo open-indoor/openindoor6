@@ -4,4 +4,6 @@ function addMapDOM() {
     document.body.appendChild(map_div)
 }
 
+
+
 export default addMapDOM

@@ -3,7 +3,7 @@
     "source": "shape_source",
     "type": "fill-extrusion",
     "minzoom": 15,
-    "maxzoom": 20,
+    "maxzoom": 24,
     "visibility": "visible",
     "paint": {
         "fill-extrusion-color": [
@@ -42,38 +42,8 @@
             ]
         ],
         "fill-extrusion-height": [
-            "interpolate", [
-                "linear"
-            ],
-            [
-                "zoom"
-            ],
-            19, [
-                "+",
-                4.5, [
-                    "*",
-                    5, ["+", [
-                            "get",
-                            "gap_level"
-                        ],
-                        [
-                            "get",
-                            "max_level"
-                        ]
-                    ]
-                ]
-            ],
-            20,
-            0
-        ],
-        "fill-extrusion-base": [
-            "interpolate", [
-                "linear"
-            ],
-            [
-                "zoom"
-            ],
-            19, [
+            "+",
+            4.5, [
                 "*",
                 5, ["+", [
                         "get",
@@ -81,12 +51,22 @@
                     ],
                     [
                         "get",
-                        "min_level"
+                        "max_level"
                     ]
                 ]
-            ],
-            20,
-            0
+            ]
+        ],
+        "fill-extrusion-base": [
+            "*",
+            5, ["+", [
+                    "get",
+                    "gap_level"
+                ],
+                [
+                    "get",
+                    "min_level"
+                ]
+            ]
         ],
         "fill-extrusion-opacity": [
             "interpolate", [

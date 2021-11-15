@@ -27,7 +27,7 @@
             10
         ],
         "fill-extrusion-base": 0,
-        "fill-extrusion-opacity": 0.5,
+        "fill-extrusion-opacity": 0.8,
         "fill-extrusion-color": [
             "case", [
                 "==", [

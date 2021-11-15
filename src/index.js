@@ -12,6 +12,9 @@ import pinsStyle from "./pinsStyle"
 import urlparser from "./urlparser"
 import openindoor_machine from "./openindoor_machine"
 
+// import MapboxInspect from 'mapbox-gl-inspect'
+// import 'mapbox-gl-inspect/dist/mapbox-gl-inspect.css'
+
 addMapDOM()
 
 const map = new maplibregl.Map({
@@ -31,3 +34,10 @@ let statemachine = openindoor_machine(map)
 urlparser(map);
 // controls.activateLevelControl()
 // controls.deactivateLevelControl()
+
+// map.addControl(new MapboxInspect({
+//     popup: new maplibregl.Popup({
+//         closeButton: false,
+//         closeOnClick: false
+//     })
+// }));
