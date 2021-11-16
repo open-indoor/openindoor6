@@ -21,6 +21,7 @@ const map = new maplibregl.Map({
     'container': 'map',
     'center': [-1.70188, 48.11915],
     'bearing': 0,
+    'pitch': 60,
     'zoom': 17,
     'style': mapstyle(),
 });
