@@ -35,7 +35,7 @@ function mapstyle() {
                 // "promoteId": "osm_id",
                 "minzoom": 12,
                 "maxzoom": 20,
-                "attribution": "OpenIndoor"
+                "attribution": "OpenIndoor / OpenStreetMap / Maplibre"
             },
             "pins": {
                 "type": "vector",

@@ -18,6 +18,8 @@ You can drag and drop your geojson file into the web map (from JOSM or any simil
 
 It allows you to check 3D rendering before releasing your work in OSM, or not if you want to keep your data private.
 
+Have a look at [here](EXAMPLES.md) to get examples.
+
 # Rendering examples
 
 https://app.openindoor.io/#18.01/-1.7003609/48.1196703/39.37/-74.49

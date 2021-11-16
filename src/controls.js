@@ -2,6 +2,8 @@ import MaplibreGeocoder from '@maplibre/maplibre-gl-geocoder';
 import '@maplibre/maplibre-gl-geocoder/dist/maplibre-gl-geocoder.css';
 
 
+// https://github.com/opening-hours/opening_hours.js/blob/master/examples/simple_index.html
+// import OpeningHours from 'opening_hours';
 
 
 var GeoApi = {
@@ -95,6 +97,11 @@ class FeedbackControl {
         this._linkedin.type = "button";
         this._linkedin["aria-label"] = "LinkedIn";
 
+        this._github = document.createElement("button");
+        this._github.className = "maplibregl-ctrl-icon maplibregl-ctrl-github";
+        this._github.type = "button";
+        this._github["aria-label"] = "GitHub";
+
         this._reddit.onclick = function() {
             window.open('https://www.reddit.com/r/OpenIndoor/', '_blank').focus();
         }
@@ -105,6 +112,10 @@ class FeedbackControl {
 
         this._linkedin.onclick = function() {
             window.open('https://www.linkedin.com/company/openindoor/', '_blank').focus();
+        };
+
+        this._github.onclick = function() {
+            window.open('https://github.com/open-indoor/openindoor6/issues', '_blank').focus();
         };
 
         // this._level.onclick = function() {
@@ -118,6 +129,7 @@ class FeedbackControl {
         this._container.appendChild(this._reddit);
         this._container.appendChild(this._discord);
         this._container.appendChild(this._linkedin);
+        this._container.appendChild(this._github);
 
         return this._container;
     }
