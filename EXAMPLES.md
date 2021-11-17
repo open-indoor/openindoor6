@@ -7,4 +7,3 @@ Here is the basic rendenring:
 ![Alt text](examples/img/House_building.png?raw=true "Building view")
 ![Alt text](examples/img/House_floors.png?raw=true "Floors view")
 ![Alt text](examples/img/House_indoor.png?raw=true "Indoor view")
-
