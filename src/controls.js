@@ -102,6 +102,11 @@ class FeedbackControl {
         this._github.type = "button";
         this._github["aria-label"] = "GitHub";
 
+        this._slack = document.createElement("button");
+        this._slack.className = "maplibregl-ctrl-icon maplibregl-ctrl-slack";
+        this._slack.type = "button";
+        this._slack["aria-label"] = "Slack";
+
         this._reddit.onclick = function() {
             window.open('https://www.reddit.com/r/OpenIndoor/', '_blank').focus();
         }
@@ -118,6 +123,10 @@ class FeedbackControl {
             window.open('https://github.com/open-indoor/openindoor6/issues', '_blank').focus();
         };
 
+        this._slack.onclick = function() {
+            window.open('https://osmus.slack.com/archives/C02N7ARHUBS', '_blank').focus();
+        };
+
         // this._level.onclick = function() {
         //     self.go_indoor_action
         // }
@@ -130,6 +139,7 @@ class FeedbackControl {
         this._container.appendChild(this._discord);
         this._container.appendChild(this._linkedin);
         this._container.appendChild(this._github);
+        this._container.appendChild(this._slack);
 
         return this._container;
     }
