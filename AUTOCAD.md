@@ -8,8 +8,9 @@ If you start from DWG, you can manually convert to DFX format with official ODAF
 
 Note: it's possible to automate use of this tool from command line interface.
 
-
 Transform dxf to "raw" geojson file, filtering with the AutoCAD layers you want to keep
+
+![Alt text](examples/autocad/plan_librecad.png?raw=true "3 points")
 
 ```
 ogr2ogr \
@@ -60,56 +61,36 @@ Once you succesfully get your raw geojson file, you need to place it at the good
 
 In this case, you need 3 points from your original AutoCAD plan which you know what are GPS coordinates.
 
+JOSM is a good tool to get your coordinates of these points
+
+So let's use these 3 points:
+
+![Alt text](examples/autocad/points_ref.png?raw=true "3 points")
+
+Note: with JOSM, use CTRL+J (or COMMAND+J) to get exact GPS coordinates of a point
+
+| Autocad_X_1 | Autocad_Y_1 | GPS_lon_1  | GPS_lat_2   |
+|-------------|-------------|------------|-------------|
+| -5.4896289  | 47.46861965 | 3.11171115 | 45.75836725 |
+| -5.35169495 | 47.4779303  | 3.11118275 | 45.75924865 |
+| -5.32791985 | 47.5510717  | 3.11011255 | 45.7591626  |
+
 ```
 ogr2ogr \
     -progress \
-    -f 'GeoJSON'
-    ./plan.geojson \
-    ./plan_raw.geojson \
-    -gcp $Autocad_X_1 $Autocad_Y_1 $GPS_lon_1 $GPS_lat_1 \
-    -gcp $Autocad_X_2 $Autocad_Y_2 $GPS_lon_2 $GPS_lat_2 \
-    -gcp $Autocad_X_3 $Autocad_Y_3 $GPS_lon_3 $GPS_lat_3
+    -f 'GeoJSON' \
+    ./examples/autocad/plan.geojson \
+    ./examples/autocad/plan_raw.geojson \
+    -gcp -5.4896289 47.46861965 3.11171115 45.75836725 \
+    -gcp -5.35169495 47.4779303 3.11118275 45.75924865 \
+    -gcp -5.32791985 47.5510717 3.11011255 45.7591626
 ```
 
-This command could help to get the bounding box and to rely on it to make match points:
+Here is the result after locating it well:
 
-```
-$ ogrinfo -al examples/autocad/plan_raw.geojson
+![Alt text](examples/autocad/plan_relocated.png?raw=true "3 points")
 
-INFO: Open of `examples/autocad/plan_raw.geojson'
-      using driver `GeoJSON' successful.
 
-Layer name: SELECT
-Geometry: Unknown (any)
-Feature Count: 3
-Extent: (-5.489629, 47.457980) - (-5.323615, 47.551072)
-(...)
-```
-
-So, manually added as an additional feature:
-
-```
-        {
-            "type": "Feature",
-            "properties": {
-                "Layer": "My_Bounding_Box"
-            },
-            "geometry": {
-                "type": "LineString",
-                "coordinates": [
-                    [-5.489629, 47.457980],
-                    [-5.489629, 47.551072],
-                    [-5.323615, 47.551072],
-                    [-5.323615, 47.457980],
-                    [-5.489629, 47.457980]
-                ]
-            }
-        }
-```
-
-Here is the result:
-
-![Alt text](examples/autocad/bounded_plan.png?raw=true "Bounded plan")
 
 ## Transform to OSM compliant indoor tags
 
@@ -124,8 +105,8 @@ Each original AutoCAD layer should define a specific type of geometry:
 Add `inddor="room"` tag to all features coming from 'technical_room' AutoCAD layer:
 
 ```
-cat ./plan.geojson | jq '.features | map(select(.properties.LAYER == "technical_room"))' | \
-  jq '.features[].properties.indoor = "room"'
+echo '{"type": "FeatureCollection","features":'`jq '.features | map(select(.properties.Layer == "ABY_Contour_Facade")) | .[].properties.building="yes"' ./examples/autocad/plan.geojson`'}' \
+ > ./examples/autocad/building.geojson
 ```
 
 And so on...

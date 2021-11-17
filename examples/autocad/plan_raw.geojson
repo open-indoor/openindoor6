@@ -2,8 +2,12 @@
     "type": "FeatureCollection",
     "name": "SELECT",
     "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
-    "features": [
-        { "type": "Feature", "properties": { "Layer": "ABY_Contour_Facade", "PaperSpace": null, "SubClasses": "AcDbEntity:AcDbPolyline", "Linetype": "ByLayer", "EntityHandle": "1A2", "Text": null }, "geometry": { "type": "LineString", "coordinates": [
+    "features": [{
+            "type": "Feature",
+            "properties": { "Layer": "ABY_Contour_Facade", "PaperSpace": null, "SubClasses": "AcDbEntity:AcDbPolyline", "Linetype": "ByLayer", "EntityHandle": "1A2", "Text": null },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
                     [-5.48962605978112, 47.468620321051866],
                     [-5.473933789671382, 47.469728462149519],
                     [-5.473557832884361, 47.467278095104035],
@@ -190,8 +194,15 @@
                     [-5.472301484878051, 47.459087921508761],
                     [-5.48799052300947, 47.457980016248804],
                     [-5.48962605978112, 47.468620321051866]
-                ] } },
-        { "type": "Feature", "properties": { "Layer": "ABY_Contour_Facade", "PaperSpace": null, "SubClasses": "AcDbEntity:AcDbBlockReference", "Linetype": "ByLayer", "EntityHandle": "1A3", "Text": null }, "geometry": { "type": "MultiLineString", "coordinates": [
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": { "Layer": "ABY_Contour_Facade", "PaperSpace": null, "SubClasses": "AcDbEntity:AcDbBlockReference", "Linetype": "ByLayer", "EntityHandle": "1A3", "Text": null },
+            "geometry": {
+                "type": "MultiLineString",
+                "coordinates": [
                     [
                         [-5.489622843118917, 47.468621074186167],
                         [-5.489629436366727, 47.468620608115216]
@@ -220,7 +231,9 @@
                         [-5.489622763157234, 47.468620554087273],
                         [-5.489622683195552, 47.468620033988387]
                     ]
-                ] } },
+                ]
+            }
+        },
         { "type": "Feature", "properties": { "Layer": "ABY_Contour_Facade", "PaperSpace": null, "SubClasses": "AcDbEntity:AcDbText:AcDbText", "Linetype": "ByLayer", "EntityHandle": "1A3", "Text": "ID_PIECE" }, "geometry": { "type": "Point", "coordinates": [-5.489626099761977, 47.468620581101298, 0.0] } }
     ]
 }
