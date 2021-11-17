@@ -15,7 +15,7 @@ Transform dxf to "raw" geojson file, filtering with the AutoCAD layers you want 
 ```
 ogr2ogr \
     -progress \
-    -dialect sqlite -sql "SELECT * FROM entities WHERE layer in ('ABY_Contour_Facade')" \
+    -dialect sqlite -sql "SELECT * FROM entities WHERE layer in ('ABY_Contour_Facade','ABY_Zone_ZIND','Texte_Pièces')" \
     -f 'GeoJSON' \
     ./examples/autocad/plan_raw.geojson \
     ./examples/autocad/plan.dxf \
@@ -105,8 +105,13 @@ Each original AutoCAD layer should define a specific type of geometry:
 Add `inddor="room"` tag to all features coming from 'technical_room' AutoCAD layer:
 
 ```
-echo '{"type": "FeatureCollection","features":'`jq '.features | map(select(.properties.Layer == "ABY_Contour_Facade")) | .[].properties.building="yes"' ./examples/autocad/plan.geojson`'}' \
- > ./examples/autocad/building.geojson
+echo '{"type": "FeatureCollection","features":'`\
+  jq '.features |\
+    (map(select(.properties.Layer == "ABY_Contour_Facade")) | .[].properties.building="yes") \
+    + (map(select(.properties.Layer == "ABY_Zone_ZIND")) | .[].properties.indoor="room" | .[].properties.level="0")' \
+    ./examples/autocad/plan.geojson \
+`'}' \
+ > ./examples/autocad/plan_osm.geojson
 ```
 
 And so on...
@@ -114,3 +119,5 @@ And so on...
 ## Rendering
 
 At the end, check the rendering by drag and dropping your final geojson file in app.openindoor.io app.
+
+![Alt text](examples/autocad/plan_indoor.png?raw=true "3 points")

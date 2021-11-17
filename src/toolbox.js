@@ -1,4 +1,6 @@
 import centroid from '@turf/centroid';
+import buffer from '@turf/buffer';
+
 
 class toolbox {
     static regex1 = /^-?\d+(?:\.\d+)?(?:;-?\d+(?:\.\d+)?)*$/;
@@ -80,6 +82,13 @@ class toolbox {
         // console.log('size:', geojson.features.length)
         let count = 0;
         let new_features = [];
+
+        for (let feature of geojson.features.filter(feat_ => (
+                (feat_.properties !== undefined) &&
+                (feat_.properties.indoor === "room")
+            ))) {
+            feature.geometry = buffer(feature, 0.1, { units: 'meters' }).geometry
+        }
 
         for (let feature of geojson.features) {
             if (feature.properties === undefined)

@@ -1,7 +1,7 @@
 [{
     "id": "indoor-tag",
     "source": "indoor_source",
-    "minzoom": 17,
+    "minzoom": 15,
     "visibility": "none",
     "filter": [
         "all", [
@@ -59,6 +59,10 @@
                 "indoor"
             ],
             "room"
+        ],
+        [
+            "==", ["geometry-type"],
+            "Polygon"
         ]
     ],
     "type": "fill-extrusion",

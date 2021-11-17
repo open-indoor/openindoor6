@@ -318,6 +318,7 @@ class machine extends Abstractmachine {
             let geojson;
             if (ext === "geojson") {
                 geojson = JSON.parse(text);
+                console.log('-geojson:', geojson)
             } else if (ext === "osm") {
                 console.log('text:', text);
                 let data = (new DOMParser()).parseFromString(
@@ -327,7 +328,7 @@ class machine extends Abstractmachine {
                 geojson = osmtogeojson(
                     data, {
                         flatProperties: true,
-                        polygonFeatures: function() { return false }
+                        polygonFeatures: function() { return true }
                     }
                 )
             }
@@ -375,7 +376,7 @@ class machine extends Abstractmachine {
                 features: geojson.features.filter(feat_ => ('building' in feat_.properties))
             }
 
-            for (let feat_ of building_data.features) {
+            for (let feat_ of building_data.features.filter(feat__ => feat__.geometry.type !== "Point")) {
                 let polygons = polygonize(feat_)
                     // console.log('feat_:', feat_)
                     // console.log('polygons:', polygons)
