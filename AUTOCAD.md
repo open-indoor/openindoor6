@@ -67,13 +67,17 @@ So let's use these 3 points:
 
 ![Alt text](examples/autocad/points_ref.png?raw=true "3 points")
 
-Note: with JOSM, use CTRL+J (or COMMAND+J) to get exact GPS coordinates of a point
+With JOSM, here are screenshots that show how to get these values:
+- zoom in the point to put it in the center of the view
+![Alt text](examples/autocad/zoom_to_selected_point.png?raw=true "3 points")
+- get the GPS coordintaes of the center of the view, use CTRL+J (or COMMAND+J)
+![Alt text](examples/autocad/get_GPS_coord_of_view_center.png?raw=true "3 points")
 
-| Autocad_X_1 | Autocad_Y_1 | GPS_lon_1  | GPS_lat_2   |
-|-------------|-------------|------------|-------------|
-| -5.4896289  | 47.46861965 | 3.11171115 | 45.75836725 |
-| -5.35169495 | 47.4779303  | 3.11118275 | 45.75924865 |
-| -5.32791985 | 47.5510717  | 3.11011255 | 45.7591626  |
+| Point number | Autocad_X_1 | Autocad_Y_1 | GPS_lon_1  | GPS_lat_2   |
+|--------------|-------------|-------------|------------|-------------|
+|       1      | -5.4896289  | 47.46861965 | 3.11171115 | 45.75836725 |
+|       2      | -5.35169495 | 47.4779303  | 3.11118275 | 45.75924865 |
+|       3      | -5.32791985 | 47.5510717  | 3.11011255 | 45.7591626  |
 
 ```
 ogr2ogr \
