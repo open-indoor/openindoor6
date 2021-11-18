@@ -114,16 +114,18 @@ class toolbox {
             if ('repeat_on' in feature.properties) {
                 let levels = toolbox.parseLevelsFloat(feature.properties.repeat_on);
                 // console.log('repeat on levels:', levels)
-                // let first = true;
-                for (let level of levels) {
-                    // if (first) {
-                    //     first = false
-                    //     feature.properties.level = level
-                    //     continue
-                    // }
-                    let new_feature = JSON.parse(JSON.stringify(feature));
-                    new_feature.level = level;
-                    new_features.push(new_feature)
+                if (levels != null) {
+                    // let first = true;
+                    for (let level of levels) {
+                        // if (first) {
+                        //     first = false
+                        //     feature.properties.level = level
+                        //     continue
+                        // }
+                        let new_feature = JSON.parse(JSON.stringify(feature));
+                        new_feature.level = level;
+                        new_features.push(new_feature)
+                    }
                 }
             }
         }

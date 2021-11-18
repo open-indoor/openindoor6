@@ -179,6 +179,7 @@ class machine extends Abstractmachine {
             } else if (openIndoorMachine.getState().constructor.name === indoor_state.constructor.name) {
                 return indoor_state.on_change_level_action({ level });
             }
+            // openIndoorMachine.getState().on_change_level_action({ level })
         });
 
 
@@ -805,7 +806,7 @@ class Building extends Abstractmachine {
                     // if (machine.map.getSource("raster-tiles") != undefined) {
                     //     machine.map.removeSource("raster-tiles");
                     // }
-                    // console.log('indoor_geojson:', machine.indoor_data)
+                    console.log('indoor_geojson:', machine.indoor_data)
                     machine.map.getSource("shape_source").setData(machine.floors_data);
                     machine.map.getSource("indoor_source").setData(machine.indoor_data);
                     // machine.map.getSource("indoor_flat_source").setData(machine.indoor_data);
