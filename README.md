@@ -3,6 +3,7 @@ Welcome to OpenIndoor 3D web app project.
 Application is here:
 https://app.openindoor.io
 
+Quick video here: https://youtu.be/9JViDVSVnwo
 # tl;dr
 
 OpenInddor app aims to render OSM data inside a building in a 3D way.
