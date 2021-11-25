@@ -1,7 +1,6 @@
 # AutoCAD
 
-Let's start with another example, starting with 2 AutoCAD plans, level 0 and level 1.
-
+Let's start with another example, starting with AutoCAD plan of a building with 4 levels:-1,0,1 and 2
 ## AutoCAD to geojson
 
 If you start from DWG, you can manually convert to DFX format with official ODAFileConverter
@@ -102,7 +101,7 @@ Each original AutoCAD layer should define a specific type of geometry:
 
 - technical room
 - office room
-- tootway
+- footway
 - desk
 - ...
 
@@ -120,8 +119,19 @@ echo '{"type": "FeatureCollection","features":'`\
 
 And so on...
 
+Repeat the steps above for the other levels in the dxf file of the building in question.
+
+Merge the geojson files into one single file. This can be done with JOSM:
+<img width="1439" alt="Screenshot 2021-11-25 at 12 38 11" src="https://user-images.githubusercontent.com/85451188/143435096-a4ba0e1d-276d-44a7-840e-565df0769d79.png">
+<img width="1432" alt="Screenshot 2021-11-25 at 12 38 35" src="https://user-images.githubusercontent.com/85451188/143435127-1425bbc8-ca1c-40c1-bf2a-41e8c2ee50cc.png">
+
 ## Rendering
 
 At the end, check the rendering by drag and dropping your final geojson file in app.openindoor.io app.
 
-![Alt text](examples/autocad/plan_indoor.png?raw=true "3 points")
+<img width="1918" alt="Screenshot 2021-11-25 at 12 50 26" src="https://user-images.githubusercontent.com/85451188/143436831-fbf53bed-4ae9-4e85-8f91-a413eabba4e6.png">
+
+You can select each floor level to view the indoor data at each level:
+
+<img width="1913" alt="Screenshot 2021-11-25 at 12 57 14" src="https://user-images.githubusercontent.com/85451188/143438322-3a13cc33-348b-47a0-b9c0-e06bd5adb94b.png">
+
