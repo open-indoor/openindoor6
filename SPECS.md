@@ -14,7 +14,7 @@
     <td>Indoor area<br/>Corridor</td><td>indoor=area<br/>indoor=corridor</td><td>Polygon</td><td>flat area<br/>#fafafa</td><td></td><td>done</td>
   </tr>
   <tr>
-    <td>Door</td><td>indoor=door</td><td>Point</td><td>door icon</td><td></td><td>todo</td>
+    <td>Door</td><td>indoor=door<br/>door=*</td><td>Point</td><td>door icon</td><td></td><td>todo</td>
   </tr>
   <tr>
     <td>Footway</td><td>highway=footway</td><td>LineString</td><td>flat dotted line<br/>#f8fabf</td><td></td><td>done</td>
