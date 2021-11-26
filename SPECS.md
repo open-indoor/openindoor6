@@ -5,19 +5,22 @@
     <td>What</td><td>tags</td><td>geometry type</td><td>rendering</td><td>screenshot</td><td>progress</td>
   </tr>
   <tr>
-    <td>Room</td><td>indoor=room</td><td>Buffered Linestring<br/>(2x10cm)</td><td>footprint extrusion</td><td><img src="./specs/indoor_room.png"></td><td>done</td>
+    <td>Room</td><td>indoor=room</td><td>Buffered Linestring<br/>(2x10cm)</td><td>footprint extrusion</td><td><img src="./specs/indoor_room.png"></td><td>dev</td>
   </tr>
   <tr>
-    <td>Wall</td><td>indoor=wall</td><td>Buffered Linestring<br/>(2x10cm)</td><td>footprint extrusion<br/>#f0f0f0</td><td></td><td>done</td>
+    <td>Wall</td><td>indoor=wall</td><td>Buffered Linestring<br/>(2x10cm)</td><td>footprint extrusion<br/>#f0f0f0</td><td></td><td>dev</td>
   </tr>
   <tr>
-    <td>Indoor area<br/>Corridor</td><td>indoor=area<br/>indoor=corridor</td><td>Polygon</td><td>flat area<br/>#fafafa</td><td></td><td>done</td>
+    <td>Indoor area<br/>Corridor</td><td>indoor=area<br/>indoor=corridor</td><td>Polygon</td><td>flat area<br/>#fafafa</td><td></td><td>dev</td>
   </tr>
   <tr>
-    <td>Door</td><td>indoor=door<br/>door=*</td><td>Point</td><td>door icon</td><td></td><td>todo</td>
+    <td>Door</td><td>indoor=door<br/>door=*</td><td>Point</td><td>door icon</td><td></td><td>dev</td>
   </tr>
   <tr>
-    <td>Footway</td><td>highway=footway</td><td>LineString</td><td>flat dotted line<br/>#f8fabf</td><td></td><td>done</td>
+    <td>Door</td><td>indoor=door<br/>door=*</td><td>Polygon<br/>(width=90cm)</td><td>part of the whole</td><td></td><td>dev</td>
+  </tr>
+  <tr>
+    <td>Footway</td><td>highway=footway</td><td>LineString</td><td>flat dotted line<br/>#f8fabf</td><td></td><td>dev</td>
   </tr>
 
   <tr>
