@@ -5,6 +5,16 @@
     "minzoom": 15,
     "maxzoom": 24,
     "visibility": "visible",
+    "filter": [
+        "any", [
+            "has",
+            "building"
+        ],
+        [
+            "has",
+            "indoor"
+        ]
+    ],
     "paint": {
         "fill-extrusion-color": [
             "case", [

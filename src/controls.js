@@ -43,12 +43,6 @@ var GeoApi = {
 };
 
 
-var geocoder = new MaplibreGeocoder(
-    GeoApi, {
-        maplibregl: maplibregl
-    }
-);
-
 
 
 class FeedbackControl {
@@ -215,7 +209,7 @@ class LevelControl {
         this._level.className = "maplibregl-ctrl-icon maplibregl-ctrl-level";
         this._level.type = "button";
         this._level["aria-label"] = "Level";
-        this._level.style.fontSize = "72px";
+        // this._level.style.fontSize = "36px";
         this._level.textContent = this._level_number;
 
         this._down = document.createElement("button");
@@ -448,6 +442,10 @@ class IndoorControl {
 class Controls {
 
 
+    on_geocoder_result(fn) {
+        this.geocoder.on('result', fn)
+    }
+
     // machine.controls.set_on_building_event(() => {
     //     machine.setState(building)
     // })
@@ -492,7 +490,7 @@ class Controls {
 
     activateLevelControl() {
         if (!(this.map.hasControl(this.levelControl)))
-            this.map.addControl(this.levelControl, "top-right");
+            this.map.addControl(this.levelControl, "top-left");
     }
 
     deactivateLevelControl() {
@@ -521,9 +519,17 @@ class Controls {
         this.building_control = new BuildingControl();
         this.floor_control = new FloorControl();
         this.indoor_control = new IndoorControl();
+        this.geocoder = new MaplibreGeocoder(
+            GeoApi, {
+                maplibregl: maplibregl
+            }
+        );
 
-        this.feedbackControl = new FeedbackControl({})
-        map.addControl(this.feedbackControl, "top-left");
+        map.addControl(this.geocoder, "top-right");
+
+        map.addControl(this.building_control, "top-left");
+        map.addControl(this.floor_control, "top-left");
+        map.addControl(this.indoor_control, "top-left");
 
         this.levelControl = new LevelControl({
             minpitchzoom: 11,
@@ -531,14 +537,7 @@ class Controls {
 
         // map.addControl(new PitchToggle({ minpitchzoom: 11 }), "top-left");
 
-        map.addControl(geocoder, "top-right");
 
-
-        var nav = new maplibregl.NavigationControl({
-            visualizePitch: true
-        });
-
-        map.addControl(nav, 'top-left');
 
         map.addControl(new maplibregl.GeolocateControl({
             positionOptions: {
@@ -546,6 +545,9 @@ class Controls {
             },
             trackUserLocation: true
         }));
+
+        this.feedbackControl = new FeedbackControl({})
+        map.addControl(this.feedbackControl, "bottom-left");
 
         var scale = new maplibregl.ScaleControl({
             maxWidth: 80,
@@ -555,12 +557,10 @@ class Controls {
 
         scale.setUnit('metric');
         map.addControl(new maplibregl.FullscreenControl({ container: document.querySelector('body') }));
-
-
-        map.addControl(this.building_control, "top-left");
-        map.addControl(this.floor_control, "top-left");
-        map.addControl(this.indoor_control, "top-left");
-
+        var nav = new maplibregl.NavigationControl({
+            visualizePitch: true
+        });
+        map.addControl(nav, 'top-right');
 
 
 

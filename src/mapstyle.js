@@ -8,6 +8,10 @@ import indoor_layers from './layers/indoor.json';
 function mapstyle() {
     return {
         "version": 8,
+        "transition": {
+            "duration": 300,
+            "delay": 0
+        },
         "name": "Blank",
         "center": [0, 0],
         "zoom": 0,
@@ -69,7 +73,7 @@ function mapstyle() {
                 }
             },
         },
-        "sprite": "https://open-indoor.github.io/sprite/sprite",
+        "sprite": "https://open-indoor.github.io/sprite_2/sprite",
         "glyphs": "https://open-indoor.github.io/fonts/{fontstack}/{range}.pbf",
         "layers": [
             ...background_layers,
