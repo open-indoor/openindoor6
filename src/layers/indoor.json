@@ -120,6 +120,53 @@
         "fill-outline-color": "#000000"
     }
 }, {
+    "id": "railway-line",
+    "type": "line",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "visibility": "none",
+    "filter": [
+        "all", [
+            "==", ["geometry-type"],
+            "LineString"
+        ],
+        [
+            "any", [
+                "all", [
+                    "has",
+                    "railway"
+                ],
+                [
+                    "==", [
+                        "get",
+                        "railway"
+                    ],
+                    "rail"
+                ]
+            ],
+            [
+                "all", [
+                    "has",
+                    "route"
+                ],
+                [
+                    "==", [
+                        "get",
+                        "route"
+                    ],
+                    "train"
+                ]
+            ]
+
+        ]
+    ],
+    "paint": {
+        "line-opacity": 1,
+        "line-dasharray": [2, 2],
+        "line-color": "#646464",
+        "line-width": 10
+    }
+}, {
     "id": "highway-footway-line",
     "type": "line",
     "source": "indoor_source",
