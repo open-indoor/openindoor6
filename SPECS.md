@@ -27,10 +27,13 @@
     <td>Stairs</td><td>room=stairs<br/>stairs=*</td><td>Point</td><td>- stairs icon<br>- specific color<br/></td><td></td><td>todo</td>
   </tr>
   <tr>
-    <td>Elevator</td><td>elevator=*</td><td>Point</td><td>- elevator icon<br>- specific color<br/></td><td></td><td>todo</td>
+    <td>Elevator</td><td>room=elevator<br/>elevator=*</td><td>Point</td><td>- elevator icon<br>- specific color<br/></td><td></td><td>todo</td>
   </tr>
   <tr>
-    <td>Toilets</td><td>toilets=*<br/>room=toilets</td><td>Point</td><td>- toilets icon<br>- specific color<br/></td><td></td><td>todo</td>
+    <td>Escalator</td><td>room=elevator<br/>elevator=*<br/>conveying=*</td><td>Point</td><td>- escalator icon<br>- specific color<br/></td><td></td><td>todo</td>
+  </tr>
+  <tr>
+    <td>Toilets</td><td>toilets=*<br/>room=toilets<br/>amenity=*toilet*</td><td>Point</td><td>- toilets icon<br>- specific color<br/></td><td></td><td>todo</td>
   </tr>
   <tr>
     <td>Shop</td><td>room=shop</td><td>Point</td><td>- shop icon<br>- specific color<br/></td><td></td><td>todo</td>

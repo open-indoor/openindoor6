@@ -11,6 +11,7 @@ RUN yarn add --dev image-webpack-loader imagemin
 RUN yarn add --dev clean-webpack-plugin
 RUN yarn add --dev svg-inline-loader
 RUN yarn add --dev path
+RUN yarn add --dev jest
 
 RUN yarn global add http-server
 

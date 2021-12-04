@@ -167,7 +167,7 @@ class LevelControl {
     }
 
     setLevel(level) {
-        console.log('set level:', level)
+        // console.log('set level:', level)
         this._level_number = level;
         if (this._level !== undefined)
             this._level.textContent = this._level_number;

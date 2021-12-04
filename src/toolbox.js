@@ -220,6 +220,7 @@ class toolbox {
             anchors.push(anchor);
 
             feature.properties.feature_type = "unit";
+
         }
         geojson.features.push(...anchors);
 
@@ -236,6 +237,7 @@ class toolbox {
 
 
         // Buffer walls indoor=room
+        let walls = [];
         for (let feature of geojson.features.filter(
                 (feat_) => {
                     if (feat_.properties != null &&
@@ -251,8 +253,13 @@ class toolbox {
                     return false;
                 })) {
 
-            feature.geometry = buffer(feature, 0.1, { units: 'meters' }).geometry
+            let wall = buffer(feature, 0.1, { units: 'meters' });
+            wall.id = window.crypto.getRandomValues(new Uint32Array(1))[0];
+            wall.properties = JSON.parse(JSON.stringify(feature.properties));
+            wall.properties.feature_type = "fixture";
+            walls.push(wall);
         }
+        geojson.features.push(...walls);
 
 
         // remove door wall

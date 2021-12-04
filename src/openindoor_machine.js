@@ -124,6 +124,8 @@ class machine extends Abstractmachine {
         super(map);
         this.state = building_state;
         this.data_mode = "online"
+        this.pitch_old = map.getPitch();
+
         machine.controls = new Controls(map);
         let self = this;
         machine.controls.on_geocoder_result((e) => {
@@ -173,8 +175,15 @@ class machine extends Abstractmachine {
         this.state.do()
     }
 
-
-
+    // on_pitch() {
+    //     let pitch = machine.map.getPitch();
+    //     if (self.pitch_old <= 60 && pitch > 60) {
+    //         machine.map.setPaintProperty("simple-tiles", "raster-opacity", 0)
+    //     } else if (self.pitch_old > 60 && pitch <= 60) {
+    //         machine.map.setPaintProperty("simple-tiles", "raster-opacity", 1)
+    //     }
+    //     self.pitch_old = pitch;
+    // };
 
     setState(state) {
         this.state = state
@@ -394,6 +403,9 @@ class Building extends Abstractmachine {
 
     do() {
         let self = this
+            // machine.map.off('pitch', openIndoorMachine.on_pitch());
+        machine.map.off('pitch', indoor_state.on_pitch_e);
+        machine.map.off('pitch', floor_state.on_pitch_e);
 
         indoor_state.disable_display_info();
 
@@ -719,6 +731,7 @@ class Floor extends Abstractmachine {
 
     constructor(map) {
         super(map);
+        this.pitch_old = map.getPitch()
         this.hovered = {
             feature: undefined
         }
@@ -726,6 +739,7 @@ class Floor extends Abstractmachine {
         this.oldLevel = undefined
         this.hoveredLevel = undefined
     }
+
 
 
     on_change_level_action({ level }) {
@@ -769,8 +783,36 @@ class Floor extends Abstractmachine {
         }
     }
 
+    // on_pitch() {
+    //     let pitch = machine.map.getPitch();
+    //     console.log('managing pitch...')
+    //     if (self.pitch_old <= 60 && pitch > 60) {
+    //         console.log('remove raster !')
+
+    //         machine.map.setPaintProperty("simple-tiles", "raster-opacity", 0)
+    //     } else if (self.pitch_old > 60 && pitch <= 60) {
+    //         console.log('display raster !')
+
+    //         machine.map.setPaintProperty("simple-tiles", "raster-opacity", 1)
+    //     }
+    //     self.pitch_old = pitch;
+    // };
+    on_pitch_e = (e) => {
+        let pitch = machine.map.getPitch();
+        if (this.pitch_old <= 60 && pitch > 60) {
+            console.log('remove raster !')
+            machine.map.setPaintProperty("simple-tiles", "raster-opacity", 0)
+        } else if (this.pitch_old > 60 && pitch <= 60) {
+            console.log('display raster !')
+            machine.map.setPaintProperty("simple-tiles", "raster-opacity", 1)
+        }
+        this.pitch_old = pitch;
+    }
+
     do() {
         let self = this;
+        machine.map.off('pitch', indoor_state.on_pitch_e);
+        machine.map.on('pitch', floor_state.on_pitch_e);
 
         console.log('Switch to Floor State !')
 
@@ -796,7 +838,7 @@ class Floor extends Abstractmachine {
         // })
 
         // Enable raster tiles
-        machine.map.setPaintProperty("simple-tiles", "raster-opacity", 0)
+        machine.map.setPaintProperty("simple-tiles", "raster-opacity", 1)
 
         // Enable floors
         machine.map.setLayoutProperty("shape-area-extrusion-indoor-00", 'visibility', 'visible')
@@ -1035,8 +1077,24 @@ class Indoor extends Abstractmachine {
         }
 
     }
+    on_pitch_e = (e) => {
+        let pitch = machine.map.getPitch();
+        if (this.pitch_old <= 60 && pitch > 60) {
+            console.log('remove raster !')
+            machine.map.setPaintProperty("simple-tiles", "raster-opacity", 0)
+        } else if (this.pitch_old > 60 && pitch <= 60) {
+            console.log('display raster !')
+            machine.map.setPaintProperty("simple-tiles", "raster-opacity", 1)
+        }
+        this.pitch_old = pitch;
+    }
+
     do() {
         let self = this;
+        machine.map.off('pitch', floor_state.on_pitch_e);
+        machine.map.on('pitch', indoor_state.on_pitch_e);
+
+        // machine.map.on('pitch', openIndoorMachine.on_pitch());
 
         machine.map.setMaxPitch(85);
         machine.controls.enable_building_button();
@@ -1057,8 +1115,6 @@ class Indoor extends Abstractmachine {
         // deactivate shape layout
         machine.map.setLayoutProperty("shape-area-extrusion-indoor-00", 'visibility', 'none')
 
-        // deactivate raster layout
-        machine.map.setPaintProperty("simple-tiles", "raster-opacity", 0)
 
         // deactivate building footprint layout
         machine.map.setLayoutProperty("building-footprint", 'visibility', 'none')

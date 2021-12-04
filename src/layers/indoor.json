@@ -1,5 +1,6 @@
 [{
-    "id": "indoor-area-fill",
+    "id": "area-fill",
+    "type": "fill",
     "source": "indoor_source",
     "minzoom": 15,
     "visibility": "none",
@@ -30,7 +31,6 @@
             "Polygon"
         ]
     ],
-    "type": "fill",
     "paint": {
         "fill-opacity": 1,
         "fill-color": "#fafafa",
@@ -56,6 +56,68 @@
         "line-opacity": 0.1,
         "line-color": "#000000",
         "line-width": 1
+    }
+}, {
+    "id": "toilets-unit-fill",
+    "type": "fill",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "visibility": "none",
+    "filter": [
+        "all", [
+            "has",
+            "feature_type"
+        ],
+        [
+            "==", [
+                "get",
+                "feature_type"
+            ],
+            "unit"
+        ],
+        [
+            "any", [
+                "all", [
+                    "has",
+                    "amenity"
+                ],
+                [
+                    "in",
+                    "toilet", [
+                        "get",
+                        "amenity"
+                    ]
+
+                ]
+            ],
+            [
+                "all", [
+                    "has",
+                    "room"
+                ],
+                [
+                    "in",
+                    "toilet", [
+                        "get",
+                        "room"
+                    ]
+
+                ]
+            ],
+            [
+                "has",
+                "toilets"
+            ],
+            [
+                "has",
+                "toilet"
+            ]
+        ]
+    ],
+    "paint": {
+        "fill-opacity": 1,
+        "fill-color": "#dcdcff",
+        "fill-outline-color": "#000000"
     }
 }, {
     "id": "highway-footway-line",
@@ -115,11 +177,11 @@
             "base": 1,
             "stops": [
                 [
-                    17,
+                    10,
                     0.5
                 ],
                 [
-                    20,
+                    15,
                     1
                 ]
             ]
@@ -334,7 +396,8 @@
         "fill-extrusion-height": 2
     }
 }, {
-    "id": "indoor-wall-extrusion",
+    "id": "wall-fixture-extrusion",
+    "type": "fill-extrusion",
     "source": "indoor_source",
     "minzoom": 15,
     "visibility": "none",
@@ -352,7 +415,7 @@
                 "get",
                 "feature_type"
             ],
-            "unit"
+            "fixture"
         ],
         [
             "any", [
@@ -381,7 +444,6 @@
             ]
         ]
     ],
-    "type": "fill-extrusion",
     "paint": {
         "fill-extrusion-opacity": 0.8,
         "fill-extrusion-color": [
@@ -397,7 +459,7 @@
                     ], "stairs"
                 ]
             ],
-            "#c2a8d4",
+            "#f0f0f0",
             "#f0f0f0"
         ],
 
@@ -513,7 +575,7 @@
         "text-opacity": 1
     }
 }, {
-    "id": "poi-indoor-toilets",
+    "id": "toilets-anchor-symbol",
     "type": "symbol",
     "source": "indoor_source",
     "minzoom": 15,
@@ -574,11 +636,11 @@
             "base": 1,
             "stops": [
                 [
-                    17,
+                    10,
                     0.5
                 ],
                 [
-                    20,
+                    15,
                     1
                 ]
             ]
@@ -612,7 +674,7 @@
         }
     }
 }, {
-    "id": "poi-indoor-elevator",
+    "id": "elevator-anchor-symbol",
     "type": "symbol",
     "source": "indoor_source",
     "minzoom": 15,
@@ -669,11 +731,11 @@
             "base": 1,
             "stops": [
                 [
-                    17,
+                    10,
                     0.5
                 ],
                 [
-                    20,
+                    15,
                     1
                 ]
             ]
@@ -707,7 +769,7 @@
         }
     }
 }, {
-    "id": "poi-indoor-escalator",
+    "id": "escalator-anchor-symbol",
     "type": "symbol",
     "source": "indoor_source",
     "minzoom": 15,
@@ -754,11 +816,11 @@
             "base": 1,
             "stops": [
                 [
-                    17,
+                    10,
                     0.5
                 ],
                 [
-                    20,
+                    15,
                     1
                 ]
             ]
@@ -792,7 +854,7 @@
         }
     }
 }, {
-    "id": "poi-indoor-stairs",
+    "id": "stairs-anchor-symbol",
     "type": "symbol",
     "source": "indoor_source",
     "minzoom": 15,
@@ -835,11 +897,11 @@
             "base": 1,
             "stops": [
                 [
-                    17,
+                    10,
                     0.5
                 ],
                 [
-                    20,
+                    15,
                     1
                 ]
             ]
