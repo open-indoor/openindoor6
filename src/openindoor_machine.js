@@ -3,11 +3,12 @@ import indoor_layers from './layers/indoor.json';
 import footprint_layers from './layers/footprint.json';
 import toolbox from './toolbox.js';
 import centroid from '@turf/centroid';
+import bbox from '@turf/bbox';
 import convex from '@turf/convex';
 import polygonToLine from '@turf/polygon-to-line'
 import lineToPolygon from '@turf/line-to-polygon'
 import polygonize from '@turf/polygonize';
-import bbox from '@turf/bbox';
+// import bbox from '@turf/bbox';
 import clone from '@turf/clone';
 import buffer from '@turf/buffer';
 import Controls from "./controls"
@@ -613,12 +614,15 @@ class Building extends Abstractmachine {
 
 
             let building_id = selectedBuilding.properties.osm_id;
+            // let bbox = bbox(selectedBuilding);
+            // minX, minY, maxX, maxY
+            console.log('bbox:', bbox);
             let request = '[out:json];' +
                 (building_id.substring(0, 1) === 'a' ? 'rel' : 'way') +
                 '(' + building_id.substring(1) + ');' +
                 'map_to_area->.a;nwr(area.a);' +
-                'out geom;';
-
+                'out geom(' + bb + ');';
+            console.log('request:', request);
             // let polygon = JSON.parse(JSON.stringify(my_building.geometry.coordinates[0]))
 
             // let reverse = polygon.map(

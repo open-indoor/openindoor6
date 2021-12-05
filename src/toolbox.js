@@ -305,7 +305,9 @@ class toolbox {
                     continue;
                 if (diff != null)
                     room.geometry = diff.geometry;
-                if (intersect_ != null) {
+                if (door.properties.door != 'no' &&
+                    intersect_ != null
+                ) {
                     let new_door = clone(door);
                     new_door.geometry = intersect_.geometry;
                     new_doors.push(new_door)

@@ -37,7 +37,7 @@
         "fill-outline-color": "#000000"
     }
 }, {
-    "id": "indoor-tag",
+    "id": "indoor-lines",
     "type": "line",
     "source": "indoor_source",
     "minzoom": 15,
@@ -105,18 +105,73 @@
                 ]
             ],
             [
-                "has",
-                "toilets"
+                "all", [
+                    "has",
+                    "toilets"
+                ],
+                [
+                    "!=", [
+                        "get",
+                        "toilets"
+                    ],
+                    "no"
+                ]
             ],
             [
-                "has",
-                "toilet"
+                "all", [
+                    "has",
+                    "toilet"
+                ],
+                [
+                    "!=", [
+                        "get",
+                        "toilet"
+                    ],
+                    "no"
+                ]
             ]
         ]
     ],
     "paint": {
         "fill-opacity": 1,
         "fill-color": "#dcdcff",
+        "fill-outline-color": "#000000"
+    }
+}, {
+    "id": "amenity-unit-fill",
+    "type": "fill",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "visibility": "none",
+    "filter": [
+        "all", [
+            "has",
+            "feature_type"
+        ],
+        [
+            "==", [
+                "get",
+                "feature_type"
+            ],
+            "unit"
+        ],
+        [
+            "has",
+            "amenity"
+        ]
+    ],
+    "paint": {
+        "fill-opacity": 1,
+        "fill-color": [
+            "case", ["in", ["get", "amenity"],
+                ["literal", ["restaurant", "cafe", "fast_food", "bakery"]]
+            ],
+            "#f7e7db", ["in", ["get", "amenity"],
+                ["literal", ["toilet", "toilets"]]
+            ],
+            "#dcdcff",
+            "#ffffff"
+        ],
         "fill-outline-color": "#000000"
     }
 }, {
@@ -224,11 +279,11 @@
             "base": 1,
             "stops": [
                 [
-                    10,
-                    0.5
+                    15,
+                    0.3
                 ],
                 [
-                    15,
+                    24,
                     1
                 ]
             ]
@@ -241,25 +296,6 @@
         "visibility": "visible",
         "icon-optional": false,
         "icon-allow-overlap": false
-    },
-    "paint": {
-        "icon-opacity": {
-            "base": 1,
-            "stops": [
-                [
-                    15,
-                    0
-                ],
-                [
-                    16,
-                    0.5
-                ],
-                [
-                    19,
-                    1
-                ]
-            ]
-        }
     }
 }, {
     "id": "poi-indoor-door",
@@ -379,6 +415,41 @@
         }
     }
 }, {
+    "id": "indoor-anchor-outline-line",
+    "type": "line",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "visibility": "none",
+    "filter": [
+        "all", [
+            "has",
+            "feature_type"
+        ],
+        [
+            "==", [
+                "get",
+                "feature_type"
+            ],
+            "anchor"
+        ]
+    ],
+    "paint": {
+        "line-opacity": 1,
+        "line-width": 4,
+        "line-color": [
+            "case", ["in", ["get", "amenity"],
+                ["literal", ["restaurant", "cafe", "fast_food", "bakery"]]
+            ],
+            "#fa8435", [
+                "match", ["%", ["id"], 4],
+                0, "#ea4234",
+                1, "#fabc05",
+                2, "#34a853",
+                "#4286f4"
+            ]
+        ]
+    }
+}, {
     "id": "indoor-anchor-fill",
     "source": "indoor_source",
     "minzoom": 15,
@@ -399,7 +470,14 @@
     "type": "fill",
     "paint": {
         "fill-opacity": 1,
-        "fill-color": "#000000"
+        "fill-color": "#000000",
+        "fill-outline-color": [
+            "case", ["in", ["get", "amenity"],
+                ["literal", ["restaurant", "cafe", "fast_food", "bakery"]]
+            ],
+            "#fa8435",
+            "#ffffff"
+        ]
     }
 }, {
     "id": "not-indoor-tag",
@@ -407,6 +485,27 @@
     "minzoom": 15,
     "type": "line",
     "visibility": "none",
+    "filter": [
+        "any", [
+            "!", [
+                "has",
+                "feature_type"
+            ]
+        ],
+        [
+            "all", [
+                "has",
+                "feature_type"
+            ],
+            [
+                "!=", [
+                    "get",
+                    "feature_type"
+                ],
+                "anchor"
+            ]
+        ]
+    ],
     "paint": {
         "line-opacity": 1,
         "line-color": "#FF0000",
@@ -588,8 +687,8 @@
         "icon-allow-overlap": false
     },
     "paint": {
-        "text-color": "#000",
-        "text-halo-color": [
+        "text-halo-color": "#ffffff",
+        "text-color": [
             "case", [
                 "==", [
                     "feature-state",
@@ -598,11 +697,16 @@
                 null
             ],
             [
-                "match", ["%", ["id"], 4],
-                0, "#ea4234",
-                1, "#fabc05",
-                2, "#34a853",
-                "#4286f4"
+                "case", ["in", ["get", "amenity"],
+                    ["literal", ["restaurant", "cafe", "fast_food", "bakery"]]
+                ],
+                "#fa8435", [
+                    "match", ["%", ["id"], 4],
+                    0, "#ea4234",
+                    1, "#fabc05",
+                    2, "#34a853",
+                    "#4286f4"
+                ]
             ],
             [
                 "boolean", [
@@ -611,11 +715,16 @@
                 ]
             ],
             "white", [
-                "match", ["%", ["id"], 4],
-                0, "#ea4234",
-                1, "#fabc05",
-                2, "#34a853",
-                "#4286f4"
+                "case", ["in", ["get", "amenity"],
+                    ["literal", ["restaurant", "cafe", "fast_food", "bakery"]]
+                ],
+                "#fa8435", [
+                    "match", ["%", ["id"], 4],
+                    0, "#ea4234",
+                    1, "#fabc05",
+                    2, "#34a853",
+                    "#4286f4"
+                ]
             ]
         ],
         "text-halo-width": 1,
@@ -669,12 +778,30 @@
                 ]
             ],
             [
-                "has",
-                "toilets"
+                "all", [
+                    "has",
+                    "toilets"
+                ],
+                [
+                    "!=", [
+                        "get",
+                        "toilets"
+                    ],
+                    "no"
+                ]
             ],
             [
-                "has",
-                "toilet"
+                "all", [
+                    "has",
+                    "toilet"
+                ],
+                [
+                    "!=", [
+                        "get",
+                        "toilet"
+                    ],
+                    "no"
+                ]
             ]
         ]
     ],
@@ -683,11 +810,11 @@
             "base": 1,
             "stops": [
                 [
-                    10,
-                    0.5
+                    15,
+                    0.3
                 ],
                 [
-                    15,
+                    24,
                     1
                 ]
             ]
@@ -700,25 +827,6 @@
         "visibility": "visible",
         "icon-optional": false,
         "icon-allow-overlap": false
-    },
-    "paint": {
-        "icon-opacity": {
-            "base": 1,
-            "stops": [
-                [
-                    15,
-                    0
-                ],
-                [
-                    16,
-                    0.5
-                ],
-                [
-                    19,
-                    1
-                ]
-            ]
-        }
     }
 }, {
     "id": "elevator-anchor-symbol",
@@ -778,11 +886,11 @@
             "base": 1,
             "stops": [
                 [
-                    10,
-                    0.5
+                    15,
+                    0.3
                 ],
                 [
-                    15,
+                    24,
                     1
                 ]
             ]
@@ -795,25 +903,6 @@
         "visibility": "visible",
         "icon-optional": false,
         "icon-allow-overlap": false
-    },
-    "paint": {
-        "icon-opacity": {
-            "base": 1,
-            "stops": [
-                [
-                    15,
-                    0
-                ],
-                [
-                    16,
-                    0.5
-                ],
-                [
-                    19,
-                    1
-                ]
-            ]
-        }
     }
 }, {
     "id": "escalator-anchor-symbol",
@@ -863,11 +952,11 @@
             "base": 1,
             "stops": [
                 [
-                    10,
-                    0.5
+                    15,
+                    0.3
                 ],
                 [
-                    15,
+                    24,
                     1
                 ]
             ]
@@ -880,25 +969,6 @@
         "visibility": "visible",
         "icon-optional": false,
         "icon-allow-overlap": false
-    },
-    "paint": {
-        "icon-opacity": {
-            "base": 1,
-            "stops": [
-                [
-                    15,
-                    0
-                ],
-                [
-                    16,
-                    0.5
-                ],
-                [
-                    19,
-                    1
-                ]
-            ]
-        }
     }
 }, {
     "id": "stairs-anchor-symbol",
@@ -944,11 +1014,11 @@
             "base": 1,
             "stops": [
                 [
-                    10,
-                    0.5
+                    15,
+                    0.3
                 ],
                 [
-                    15,
+                    24,
                     1
                 ]
             ]
@@ -961,24 +1031,5 @@
         "visibility": "visible",
         "icon-optional": false,
         "icon-allow-overlap": false
-    },
-    "paint": {
-        "icon-opacity": {
-            "base": 1,
-            "stops": [
-                [
-                    15,
-                    0
-                ],
-                [
-                    16,
-                    0.5
-                ],
-                [
-                    19,
-                    1
-                ]
-            ]
-        }
     }
 }]
