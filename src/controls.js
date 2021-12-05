@@ -169,8 +169,12 @@ class LevelControl {
     setLevel(level) {
         // console.log('set level:', level)
         this._level_number = level;
-        if (this._level !== undefined)
+        if (this._level !== undefined) {
             this._level.textContent = this._level_number;
+            // console.log('change level:', this._level_number);
+            // console.log('min_level:', Math.min.apply(null, arr));
+            // console.log('m_level:', Math.min.apply(null, arr));
+        }
     }
 
     getLevel() {
@@ -202,6 +206,7 @@ class LevelControl {
 
         this._up = document.createElement("button");
         this._up.className = "maplibregl-ctrl-icon maplibregl-ctrl-up";
+        this._up.style.opacity = 1;
         this._up.type = "button";
         this._up["aria-label"] = "Up";
 
@@ -226,9 +231,12 @@ class LevelControl {
             // console.log('this._level_number:', self._level_number)
 
             let index = self._levels.indexOf(self._level_number);
-            console.log('index:', index)
 
-
+            // if (index === self._levels.length - 1) {
+            //     // TODO: unactivate level up button
+            // } else {
+            //     // TODO: activate level up button
+            // }
             if (!(index < self._levels.length - 1))
                 return
             self.change_level_action({ level: self._level_number }).before()
@@ -237,10 +245,24 @@ class LevelControl {
             // console.log('index:', index)
             self._level.textContent = self._level_number;
             self.change_level_action({ level: self._level_number }).after()
+
+            if (index + 1 === self._levels.length - 1) {
+                // TODO: unactivate level down button
+                // console.log('down limit')
+                self._up.style.opacity = 0.1;
+            } else {
+                // TODO: activate level down button
+                // console.log('down')
+                self._down.style.opacity = 1;
+            }
+
         };
 
         this._down.onclick = function() {
             let index = self._levels.indexOf(self._level_number);
+
+
+
             if (!(index > 0))
                 return;
 
@@ -252,6 +274,17 @@ class LevelControl {
             // console.log('index:', index)
             self._level.textContent = self._level_number;
             self.change_level_action({ level: self._level_number }).after()
+
+            if (index - 1 === 0) {
+                // TODO: unactivate level down button
+                // console.log('down limit')
+                self._down.style.opacity = 0.1;
+            } else {
+                // TODO: activate level down button
+                // console.log('down')
+                self._up.style.opacity = 1;
+            }
+
 
         };
 
