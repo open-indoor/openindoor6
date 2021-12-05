@@ -233,19 +233,16 @@
             "highway"
         ],
         [
-            "any", [
-                "==", [
-                    "get",
-                    "highway"
-                ],
-                "footway"
+            "==", [
+                "get",
+                "highway"
             ],
-            [
-                "==", [
-                    "get",
-                    "highway"
-                ],
-                "steps"
+            "footway"
+        ],
+        [
+            "!", [
+                "has",
+                "conveying"
             ]
         ],
         [
@@ -259,7 +256,76 @@
         "line-width": 20
     }
 }, {
-    "id": "highway-escalator-line",
+    "id": "highway-steps-line",
+    "type": "line",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "visibility": "none",
+    "filter": [
+        "all", [
+            "has",
+            "highway"
+        ],
+        [
+            "==", [
+                "get",
+                "highway"
+            ],
+            "steps"
+        ],
+        [
+            "!", [
+                "has",
+                "conveying"
+            ]
+        ],
+        [
+            "==", ["geometry-type"],
+            "LineString"
+        ]
+    ],
+    "paint": {
+        "line-opacity": 1,
+        "line-dasharray": [0.2, 0.2],
+        "line-color": "#f8b29c",
+        "line-width": 20
+    }
+}, {
+    "id": "footway-escalator-line",
+    "type": "line",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "visibility": "none",
+    "filter": [
+        "all", [
+            "has",
+            "highway"
+        ],
+        [
+            "in", [
+                "get",
+                "highway"
+            ],
+            [
+                "literal", ["footway", "steps"]
+            ]
+        ],
+        [
+            "has",
+            "conveying"
+        ],
+        [
+            "==", ["geometry-type"],
+            "LineString"
+        ]
+    ],
+    "paint": {
+        "line-opacity": 1,
+        "line-color": "#c2a9d4",
+        "line-width": 20
+    }
+}, {
+    "id": "highway-escalator-symbol",
     "type": "symbol",
     "source": "indoor_source",
     "minzoom": 15,
