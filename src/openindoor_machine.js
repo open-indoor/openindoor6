@@ -151,7 +151,7 @@ class machine extends Abstractmachine {
 
 
         let dropZone = document.getElementById('map');
-        dropZone.addEventListener('drop', this.handleGeojsonDropped, false);
+        dropZone.addEventListener('drop', (e) => this.handleGeojsonDropped(self, e), false);
         dropZone.addEventListener('dragover', (e) => {
             e.stopPropagation();
             e.preventDefault();
@@ -160,32 +160,22 @@ class machine extends Abstractmachine {
         }, false);
     }
 
+
     static setLevel(level) {
         machine.controls.setLevel(level)
     }
     static getLevel(level) {
         return machine.controls.getLevel()
     }
-    static controls = undefined;
-    static floors_data = undefined;
-    static indoor_data = undefined;
-    static map = undefined;
-    static INDOOR_LAYER = undefined;
+
 
     do() {
         this.state.do()
     }
 
-    // on_pitch() {
-    //     let pitch = machine.map.getPitch();
-    //     if (self.pitch_old <= 60 && pitch > 60) {
-    //         machine.map.setPaintProperty("simple-tiles", "raster-opacity", 0)
-    //     } else if (self.pitch_old > 60 && pitch <= 60) {
-    //         machine.map.setPaintProperty("simple-tiles", "raster-opacity", 1)
-    //     }
-    //     self.pitch_old = pitch;
-    // };
-
+    setFloorState() {
+        this.setState(floor_state);
+    }
     setState(state) {
         this.state = state
         this.state.do()
@@ -218,7 +208,141 @@ class machine extends Abstractmachine {
         machine.map.setFeatureState(feature_ref, property);
 
     }
-    handleGeojsonDropped(e) {
+    parse(data, ext) {
+        let geojson;
+        if (ext === "geojson") {
+            geojson = JSON.parse(data);
+
+            // console.log('-geojson:', geojson)
+            toolbox.lineOrPolygonize(geojson);
+            // for (let feature of geojson.features) {
+            //     if (
+            //         (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon') &&
+            //         !toolbox.poly_vs_line(feature.properties)
+            //     ) {
+            //         feature.geometry = polygonToLine(feature).geometry;
+            //     } else if (
+            //         (feature.geometry.type === 'LineString' || feature.geometry.type === 'MultiLineString') &&
+            //         toolbox.poly_vs_line(feature.properties)
+            //     ) {
+            //         if (feature.geometry.type === 'LineString') {
+            //             if (feature.geometry.coordinates.length >= 4) {
+            //                 // console.log('LineString feature.geometry.coordinates:', feature.geometry.coordinates);
+            //                 // polygons.add(feature.geometry.coordinates);
+            //                 feature.geometry = lineToPolygon(feature).geometry;
+            //             }
+            //         } else if (feature.geometry.type === 'MultiLineString') {
+            //             console.log('MultiLineString feature.geometry.coordinates:', feature.geometry.coordinates);
+            //             feature.geometry = lineToPolygon(feature).geometry;
+            //         }
+            //         // for (let polygon of polygons.filter(polygon.length >= 4)) {
+            //         // feature.geometry = lineToPolygon(feature).geometry;
+            //         // }
+            //     }
+            // }
+        } else if (ext === "osm") {
+            // console.log('OSM not supported yet');
+            // let xml_text = "<osm></osm>";
+            // console.log('xml_text:', xml_text);
+            let parser = new DOMParser();
+            let xml = parser.parseFromString(data, 'text/xml');
+            // console.log('xml:', xml);
+            geojson = osmtogeojson(xml, { flatProperties: false });
+            console.log('geojson:', geojson);
+            // var sampleStr = text.slice(0, 100).toString();
+
+            // let parser = new DOMParser();
+            // let xmlDoc = parser.parseFromString(text, "text/xml");
+
+            // geojson = osmtogeojson(
+            //     xmlDoc, {
+            //         flatProperties: true,
+            //         polygonFeatures: function(properties) {
+            //             if (properties.indoor != null && properties.indoor === 'room' ||
+            //                 properties.building
+            //             )
+            //                 return false;
+            //             return false
+            //         }
+            //     }
+            // )
+        }
+
+        openIndoorMachine.data_mode = "drag_n_drop"
+
+        geojson.features = geojson.features.filter(feat_ => (feat_.properties !== null))
+
+        // Set ids and fix properties
+        if (geojson.features.filter(feat_ => isNaN(feat_.id)).length > 0) {
+            let i = 0;
+            for (let feat_ of geojson.features) {
+                // let polygons = polygonize(feat_)
+                i++;
+                feat_.id = i;
+                feat_.properties.osm_id = "x" + i;
+            }
+        }
+
+
+        // reset footprint source and layer
+        for (let layer of footprint_layers) {
+            if (machine.map.getLayer(layer.id) === undefined)
+                continue;
+            machine.map.removeLayer(layer.id);
+        }
+        machine.map.removeSource('footprint');
+        let building_data = {
+            type: "FeatureCollection",
+            features: geojson.features.filter(feat_ => ('building' in feat_.properties))
+        }
+        console.log('building_data:', building_data)
+
+        machine.map.addSource('footprint', {
+            "type": "geojson",
+            "data": building_data
+        });
+        for (let layer of footprint_layers) {
+            if (machine.map.getLayer(layer.id) !== undefined)
+                continue;
+            delete layer["source-layer"];
+            machine.map.addLayer(layer);
+        }
+
+
+        toolbox.fix_indoor(geojson)
+        machine.floors_data = clone(geojson);
+        machine.map.getSource("shape_source").setData(machine.floors_data);
+
+        machine.indoor_data = geojson;
+        toolbox.openindoorize(geojson)
+
+
+
+        // for (let feat_ of building_data.features.filter(feat__ =>
+        //         feat__.geometry.type === "LineString" ||
+        //         feat__.geometry.type === "MultiineString"
+        //     )) {
+        //     // console.log('feat_:', feat_)
+        //     let polygons = polygonize(feat_)
+        //     if (polygons.features.length === 0)
+        //         continue;
+        //     feat_.geometry = polygons.features[0].geometry;
+        // }
+        // console.log('building_data:', building_data)
+
+        // init building footprint data
+
+
+        machine.map.getSource("indoor_source").setData(machine.indoor_data);
+        let center = centroid(machine.floors_data).geometry.coordinates;
+        console.log('center:', center);
+        machine.map.flyTo({
+            center: center,
+            zoom: 16
+        });
+        openIndoorMachine.setState(building_state);
+    }
+    handleGeojsonDropped(self, e) {
         e.stopPropagation();
         e.preventDefault();
         console.log('handleGeojsonDropped !');
@@ -228,147 +352,32 @@ class machine extends Abstractmachine {
         reader.onprogress = function(e) {}
         reader.onabort = function(e) {};
         reader.onloadstart = function(e) {};
-        let self = this;
+        // let self = this;
         reader.onload = function(e) {
             let text = e.target.result; // INPUT IS TEXT FILE
             let re = /(?:\.([^.]+))?$/;
             let ext = re.exec(files[0].name)[1];
-            let geojson;
-            if (ext === "geojson") {
-                geojson = JSON.parse(text);
-                // console.log('-geojson:', geojson)
-                toolbox.lineOrPolygonize(geojson);
-                // for (let feature of geojson.features) {
-                //     if (
-                //         (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon') &&
-                //         !toolbox.poly_vs_line(feature.properties)
-                //     ) {
-                //         feature.geometry = polygonToLine(feature).geometry;
-                //     } else if (
-                //         (feature.geometry.type === 'LineString' || feature.geometry.type === 'MultiLineString') &&
-                //         toolbox.poly_vs_line(feature.properties)
-                //     ) {
-                //         if (feature.geometry.type === 'LineString') {
-                //             if (feature.geometry.coordinates.length >= 4) {
-                //                 // console.log('LineString feature.geometry.coordinates:', feature.geometry.coordinates);
-                //                 // polygons.add(feature.geometry.coordinates);
-                //                 feature.geometry = lineToPolygon(feature).geometry;
-                //             }
-                //         } else if (feature.geometry.type === 'MultiLineString') {
-                //             console.log('MultiLineString feature.geometry.coordinates:', feature.geometry.coordinates);
-                //             feature.geometry = lineToPolygon(feature).geometry;
-                //         }
-                //         // for (let polygon of polygons.filter(polygon.length >= 4)) {
-                //         // feature.geometry = lineToPolygon(feature).geometry;
-                //         // }
-                //     }
-                // }
-            } else if (ext === "osm") {
-                // console.log('OSM not supported yet');
-                // let xml_text = "<osm></osm>";
-                // console.log('xml_text:', xml_text);
-                let parser = new DOMParser();
-                let xml = parser.parseFromString(text, 'text/xml');
-                // console.log('xml:', xml);
-                geojson = osmtogeojson(xml, { flatProperties: false });
-                console.log('geojson:', geojson);
-                // var sampleStr = text.slice(0, 100).toString();
-
-                // let parser = new DOMParser();
-                // let xmlDoc = parser.parseFromString(text, "text/xml");
-
-                // geojson = osmtogeojson(
-                //     xmlDoc, {
-                //         flatProperties: true,
-                //         polygonFeatures: function(properties) {
-                //             if (properties.indoor != null && properties.indoor === 'room' ||
-                //                 properties.building
-                //             )
-                //                 return false;
-                //             return false
-                //         }
-                //     }
-                // )
-            }
-
-            openIndoorMachine.data_mode = "drag_n_drop"
-
-            geojson.features = geojson.features.filter(feat_ => (feat_.properties !== null))
-
-            // Set ids and fix properties
-            if (geojson.features.filter(feat_ => isNaN(feat_.id)).length > 0) {
-                let i = 0;
-                for (let feat_ of geojson.features) {
-                    // let polygons = polygonize(feat_)
-                    i++;
-                    feat_.id = i;
-                    feat_.properties.osm_id = "x" + i;
-                }
-            }
+            self.parse(text, ext)
 
 
-            // reset footprint source and layer
-            for (let layer of footprint_layers) {
-                if (machine.map.getLayer(layer.id) === undefined)
-                    continue;
-                machine.map.removeLayer(layer.id);
-            }
-            machine.map.removeSource('footprint');
-            let building_data = {
-                type: "FeatureCollection",
-                features: geojson.features.filter(feat_ => ('building' in feat_.properties))
-            }
-            console.log('building_data:', building_data)
-
-            machine.map.addSource('footprint', {
-                "type": "geojson",
-                "data": building_data
-            });
-            for (let layer of footprint_layers) {
-                if (machine.map.getLayer(layer.id) !== undefined)
-                    continue;
-                delete layer["source-layer"];
-                machine.map.addLayer(layer);
-            }
-
-
-            toolbox.fix_indoor(geojson)
-            machine.floors_data = clone(geojson);
-            machine.map.getSource("shape_source").setData(machine.floors_data);
-
-            machine.indoor_data = geojson;
-            toolbox.openindoorize(geojson)
-
-
-
-            // for (let feat_ of building_data.features.filter(feat__ =>
-            //         feat__.geometry.type === "LineString" ||
-            //         feat__.geometry.type === "MultiineString"
-            //     )) {
-            //     // console.log('feat_:', feat_)
-            //     let polygons = polygonize(feat_)
-            //     if (polygons.features.length === 0)
-            //         continue;
-            //     feat_.geometry = polygons.features[0].geometry;
-            // }
-            // console.log('building_data:', building_data)
-
-            // init building footprint data
-
-
-            machine.map.getSource("indoor_source").setData(machine.indoor_data);
-
-            let center = centroid(machine.floors_data).geometry.coordinates;
-            console.log('center:', center);
-            machine.map.flyTo({
-                center: center,
-                zoom: 16
-            });
-            openIndoorMachine.setState(building_state);
+            // let center = centroid(machine.floors_data).geometry.coordinates;
+            // console.log('center:', center);
+            // machine.map.flyTo({
+            //     center: center,
+            //     zoom: 16
+            // });
+            // openIndoorMachine.setState(building_state);
         }
         reader.readAsText(files[0]);
     }
 }
+
+
+machine.controls = undefined;
+machine.floors_data = undefined;
+machine.indoor_data = undefined;
+machine.map = undefined;
+machine.INDOOR_LAYER = undefined;
 
 class Init extends Abstractmachine {
 
@@ -575,7 +584,6 @@ class Building extends Abstractmachine {
 
         building_state.oldClickedBuildingId = building_state.clickedBuildingId;
 
-
         if (openIndoorMachine.data_mode === "drag_n_drop") {
 
             let levels = [...new Set(machine.floors_data.features.map(
@@ -621,7 +629,11 @@ class Building extends Abstractmachine {
                 (building_id.substring(0, 1) === 'a' ? 'rel' : 'way') +
                 '(' + building_id.substring(1) + ');' +
                 'map_to_area->.a;nwr(area.a);' +
-                'out geom(' + bb + ');';
+                'out geom(' +
+                ((((bb[0] - 90) % 180)) + 90) + ',' +
+                bb[1] + ',' +
+                ((((bb[2] - 90) % 180)) + 90) + ',' +
+                bb[3] + ');';
             console.log('request:', request);
             // let polygon = JSON.parse(JSON.stringify(my_building.geometry.coordinates[0]))
 
@@ -662,7 +674,7 @@ class Building extends Abstractmachine {
                     json, {
                         flatProperties: true,
                         polygonFeatures: function(properties) {
-                            if (properties.highway != null && properties.highway === 'footway')
+                            if (properties == null || (properties.highway != null && properties.highway === 'footway'))
                                 return false
                             return true
                         }
@@ -994,8 +1006,6 @@ class Indoor extends Abstractmachine {
             }
         }
     }
-    static flying = false;
-    static zoom = 20
 
     display_info(feature, coordinates) {
         // let feature_ = features[0]
@@ -1225,11 +1235,13 @@ class Indoor extends Abstractmachine {
     on_indoor_POI_selected() {}
 }
 
+Indoor.flying = false;
+Indoor.zoom = 20
+
 let openIndoorMachine = undefined;
 let building_state = undefined;
 let floor_state = undefined;
 let indoor_state = undefined;
-
 
 let el = document.createElement('div');
 el.className = 'lds-spinner';

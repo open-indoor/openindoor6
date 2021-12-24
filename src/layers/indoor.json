@@ -354,7 +354,7 @@
                 ]
             ]
         },
-        "icon-image": "escalator_64",
+        "icon-image": "conveying_64",
         "icon-anchor": "center",
         "icon-offset": [0, -32],
         "symbol-spacing": 250,
@@ -699,7 +699,8 @@
                 "feature_type"
             ],
             "anchor"
-        ]
+        ],
+        ["!", ["has", "shop"]]
     ],
     "layout": {
         "text-line-height": 1.2,
@@ -792,6 +793,199 @@
                     "#4286f4"
                 ]
             ]
+        ],
+        "text-halo-width": 1,
+        "text-opacity": 1
+    }
+}, {
+    "id": "indoor-shop-symbol",
+    "type": "symbol",
+    "visibility": "none",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "interactive": true,
+    "filter": [
+        "all", [
+            "has", "name"
+        ],
+        [
+            "has", "feature_type"
+        ],
+        [
+            "==", [
+                "get", "feature_type"
+            ],
+            "anchor"
+        ],
+        ["has", "shop"]
+    ],
+    "layout": {
+        "text-line-height": 1.2,
+        "icon-size": {
+            "base": 1,
+            "stops": [
+                [
+                    15,
+                    0.3
+                ],
+                [
+                    24,
+                    1
+                ]
+            ]
+        },
+        "text-size": {
+            "base": 1,
+            "stops": [
+                [
+                    17,
+                    22
+                ],
+                [
+                    20,
+                    26
+                ]
+            ]
+        },
+        "text-allow-overlap": false,
+        "icon-image": "{shop}_64",
+        "icon-anchor": "center",
+        "text-ignore-placement": false,
+        "text-max-angle": 38,
+        "symbol-spacing": 250,
+        "text-font": [
+            "Open Sans Regular"
+        ],
+        "symbol-placement": "point",
+        "text-padding": 2,
+        "visibility": "visible",
+        "text-offset": [
+            0, -1
+        ],
+        "icon-optional": false,
+        "text-rotation-alignment": "viewport",
+        "text-anchor": "center",
+        "text-field": "{name}",
+        "text-letter-spacing": 0.02,
+        "text-max-width": 8,
+        "icon-allow-overlap": false
+    },
+    "paint": {
+        "text-halo-color": "#ffffff",
+        "text-color": [
+            "case", [
+                "==", [
+                    "feature-state",
+                    "hover"
+                ],
+                null
+            ],
+            "#feb347", [
+                "boolean", [
+                    "feature-state",
+                    "hover"
+                ]
+            ],
+            "white",
+            "#feb347"
+        ],
+        "text-halo-width": 1,
+        "text-opacity": 1
+    }
+}, {
+    "id": "indoor-amenity-symbol",
+    "type": "symbol",
+    "visibility": "none",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "interactive": true,
+    "filter": [
+        "all", [
+            "has", "name"
+        ],
+        [
+            "has", "amenity"
+        ],
+        [
+            "has", "feature_type"
+        ],
+        [
+            "==", [
+                "get", "feature_type"
+            ],
+            "anchor"
+        ],
+        ["!", ["has", "shop"]]
+    ],
+    "layout": {
+        "text-line-height": 1.2,
+        "icon-size": {
+            "base": 1,
+            "stops": [
+                [
+                    15,
+                    0.3
+                ],
+                [
+                    24,
+                    1
+                ]
+            ]
+        },
+        "text-size": {
+            "base": 1,
+            "stops": [
+                [
+                    17,
+                    22
+                ],
+                [
+                    20,
+                    26
+                ]
+            ]
+        },
+        "text-allow-overlap": false,
+        "icon-image": "{amenity}_64",
+        "icon-anchor": "center",
+        "text-ignore-placement": false,
+        "text-max-angle": 38,
+        "symbol-spacing": 250,
+        "text-font": [
+            "Open Sans Regular"
+        ],
+        "symbol-placement": "point",
+        "text-padding": 2,
+        "visibility": "visible",
+        "text-offset": [
+            0, -1
+        ],
+        "icon-optional": false,
+        "text-rotation-alignment": "viewport",
+        "text-anchor": "center",
+        "text-field": "{name}",
+        "text-letter-spacing": 0.02,
+        "text-max-width": 8,
+        "icon-allow-overlap": false
+    },
+    "paint": {
+        "text-halo-color": "#ffffff",
+        "text-color": [
+            "case", [
+                "==", [
+                    "feature-state",
+                    "hover"
+                ],
+                null
+            ],
+            "#feb347", [
+                "boolean", [
+                    "feature-state",
+                    "hover"
+                ]
+            ],
+            "white",
+            "#feb347"
         ],
         "text-halo-width": 1,
         "text-opacity": 1
@@ -1027,7 +1221,7 @@
                 ]
             ]
         },
-        "icon-image": "escalator_64",
+        "icon-image": "conveying_64",
         "icon-anchor": "center",
         "icon-offset": [0, -32],
         "symbol-spacing": 250,

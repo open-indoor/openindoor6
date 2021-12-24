@@ -11,6 +11,7 @@ import mapstyle from "./mapstyle"
 import pinsStyle from "./pinsStyle"
 import urlparser from "./urlparser"
 import openindoor_machine from "./openindoor_machine"
+// import avatar from "./avatar"
 
 // import MapboxInspect from 'mapbox-gl-inspect'
 // import 'mapbox-gl-inspect/dist/mapbox-gl-inspect.css'
@@ -24,6 +25,7 @@ const map = new maplibregl.Map({
     'pitch': 60,
     'zoom': 17,
     'style': mapstyle(),
+    'hash': true
 });
 
 pinsStyle(map)
@@ -32,7 +34,10 @@ pinsStyle(map)
 
 let statemachine = openindoor_machine(map)
 
-urlparser(map);
+let my_geojson = urlparser(map, statemachine);
+
+// avatar(map)
+
 // controls.activateLevelControl()
 // controls.deactivateLevelControl()
 

@@ -8,8 +8,7 @@ import lineToPolygon from '@turf/line-to-polygon'
 import polygonToLine from '@turf/polygon-to-line'
 
 class toolbox {
-    static regex1 = /^-?\d+(?:\.\d+)?(?:;-?\d+(?:\.\d+)?)*$/;
-    static regex3 = /^(-?\d+)-(-?\d+)$/;
+
     /**
      * Sorts a number array
      */
@@ -297,7 +296,21 @@ class toolbox {
                 // console.log("for this room:", room)
                 // console.log("find this doors:", room_doors)
             for (let door of room_doors) {
-                let door_circle = buffer(door, 0.45, { units: 'meters' })
+                // {
+                //     "door": "hinged",
+                //     "level": "1",
+                //     "width": "0.8",
+                //     "id": "node/4001012336",
+                //     "min_level": 1,
+                //     "max_level": 1,
+                //     "gap_level": 0
+                //     }
+                let width = 0.90
+                if (door.properties != null && door.properties.width != null)
+                    width = parseFloat(door.properties.width)
+                    // console.log('door width:', door.properties.width);
+                    // console.log('door width:', width);
+                let door_circle = buffer(door, (width / 2), { units: 'meters' })
                 let diff = difference(room, door_circle);
                 let intersect_ = intersect(room, door_circle);
                 if (!(door.properties.min_level >= parseInt(room.properties.min_level) &&
@@ -441,6 +454,7 @@ class toolbox {
     }
 
 }
-
+toolbox.regex1 = /^-?\d+(?:\.\d+)?(?:;-?\d+(?:\.\d+)?)*$/;
+toolbox.regex3 = /^(-?\d+)-(-?\d+)$/;
 
 export default toolbox
