@@ -1,7 +1,9 @@
 FROM node:16-bullseye
 
-RUN apt update
-RUN apt install -y iproute2
+RUN apt-get update && apt-get install -y \
+    iproute2 \
+ && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /root/openindoor6
 ADD ./package.json ./
 
