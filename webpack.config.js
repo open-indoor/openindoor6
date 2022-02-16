@@ -2,7 +2,10 @@
 const path = require("path")
 const fs = require('fs');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-// const CleanWebpackPlugin = require('clean-webpack-plugin');
+const WorkboxPlugin = require('workbox-webpack-plugin');
+const WebpackPwaManifest = require('webpack-pwa-manifest')
+
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 // App directory
 const appDirectory = fs.realpathSync(process.cwd());
@@ -16,12 +19,22 @@ const resolveAppPath = relativePath => path.resolve(appDirectory, relativePath);
 process.env.NODE_ENV = 'development';
 
 module.exports = {
+    resolve: {
+        alias: {
+            "tinyqueue": __dirname + "/node_modules/tinyqueue/tinyqueue.js"
+        }
+    },
     entry: path.resolve(__dirname, "src/index.js"),
     output: {
-        path: path.resolve(__dirname, "dist"),
-        filename: "main.js",
-        // library: "$",
-        libraryTarget: "umd",
+        path: path.resolve(__dirname, "public"),
+        filename: "openindoor.js",
+        library: {
+            name: 'openindoor',
+            type: 'umd',
+            export: 'default',
+            umdNamedDefine: true
+        },
+        // libraryTarget: "umd",
     },
     // output: {
     //     filename: '[name].[chunkhash].js',
@@ -81,6 +94,7 @@ module.exports = {
             // },
         ],
     },
+
     // mode: env || 'development', // on définit le mode en fonction de la valeur de NODE_ENV
     devServer: {
         client: {
@@ -90,10 +104,13 @@ module.exports = {
 
         },
         webSocketServer: false,
-        static: './dist',
+        static: {
+            directory: path.join(__dirname, 'public'),
+        },
         compress: true,
         allowedHosts: [
             'app-dev.openindoor.io',
+            'app.openindoor.io',
             'localhost',
         ],
         hot: true,
@@ -116,11 +133,34 @@ module.exports = {
         //     // template: resolveAppPath('public/index.html'),
         //     title: 'Development',
         // }),
-        new HtmlWebpackPlugin({
-            inject: true,
-            // hash: true,
-            template: './public/index.html',
-            // filename: 'index.html'
-        })
+        // new HtmlWebpackPlugin({
+        //     title: 'OpenIndoor',
+        //     inject: true,
+        //     // hash: true,
+        //     template: './public/index.html',
+        //     // filename: 'index.html'
+        // }),
+        // new WorkboxPlugin.GenerateSW({
+        //     // these options encourage the ServiceWorkers to get in there fast
+        //     // and not allow any straggling "old" SWs to hang around
+        //     clientsClaim: true,
+        //     skipWaiting: true,
+        // }),
+        // new WebpackPwaManifest({
+        //     filename: "manifest.json",
+        //     name: 'OpenIndoor',
+        //     short_name: 'OpenIndoor',
+        //     description: 'OpenIndoor',
+        //     background_color: 'red',
+        //     display: 'fullscreen',
+        //     crossorigin: 'anonymous', //can be null, use-credentials or anonymous
+        //     icons: [{
+        //         src: path.resolve('src/assets/icon.png'),
+        //         sizes: [96, 128, 192, 256, 384, 512],
+        //         destination: '.'
+        //     }],
+        //     publicPath: ".",
+        //     includeDirectory: true
+        // })
     ],
 }

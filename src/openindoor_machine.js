@@ -1,5 +1,5 @@
 import osmtogeojson from 'osmtogeojson/osmtogeojson.js';
-import indoor_layers from './layers/indoor.json';
+import default_indoor_layers from './layers/indoor.json';
 import footprint_layers from './layers/footprint.json';
 import toolbox from './toolbox.js';
 import centroid from '@turf/centroid';
@@ -12,8 +12,10 @@ import polygonize from '@turf/polygonize';
 import clone from '@turf/clone';
 import buffer from '@turf/buffer';
 import Controls from "./controls"
+import Info from "./info"
+import oid_routing from "./oid_routing"
 // import { DOMParser } from '@xmldom/xmldom'
-import xmldom from 'xmldom'
+// import xmldom from 'xmldom'
 
 // import opening_hours from 'opening_hours/build/opening_hours.js'
 
@@ -101,7 +103,6 @@ class Abstractmachine {
         if (this.constructor === Abstractmachine) {
             throw new TypeError('Abstract class "AbstractConfig" cannot be instantiated directly');
         }
-
     }
 
     do() {
@@ -121,17 +122,32 @@ class Abstractmachine {
 
 class machine extends Abstractmachine {
 
-    constructor(map) {
+    static singleton = undefined;
+    static get_singleton(map, modal, popup, routing, info) {
+        if (machine.singleton === undefined)
+            machine.singleton = new machine(map, modal, popup, routing, info);
+        return machine.singleton;
+    }
+    static indoor_layers = JSON.parse(JSON.stringify(default_indoor_layers))
+
+    constructor(map, modal, popup, routing, info) {
         super(map);
+        this.modal = modal;
+        this.popup = popup;
+        this.routing = routing;
         this.state = building_state;
+        Info.data = info;
         this.data_mode = "online"
         this.pitch_old = map.getPitch();
+        this.init_mode = "building_state";
+        this.layer = "default";
 
-        machine.controls = new Controls(map);
+        machine.controls = new Controls(map, machine);
         let self = this;
-        machine.controls.on_geocoder_result((e) => {
-            self.setState(building_state);
-        })
+        // machine.controls.on_building_geocoder_result((e) => {
+        //     console.log('building_geocoder_result !');
+        //     self.setState(building_state);
+        // })
         machine.controls.set_on_indoor_button_pushed(() => {
             self.setState(indoor_state)
         });
@@ -149,6 +165,16 @@ class machine extends Abstractmachine {
             }
         });
 
+        machine.controls.set_indoor_level_action(({ level }) => {
+            if (openIndoorMachine.getState().constructor.name === floor_state.constructor.name) {
+                // return floor_state.on_set_indoor_level_action({ level });
+                // on_set_indoor_level_action({ level }) {
+                machine.get_singleton().setState(indoor_state);
+                indoor_state.on_change_level_action({ level });
+                // }
+            }
+        });
+
 
         let dropZone = document.getElementById('map');
         dropZone.addEventListener('drop', (e) => this.handleGeojsonDropped(self, e), false);
@@ -158,6 +184,9 @@ class machine extends Abstractmachine {
             console.log('dragover !')
             e.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
         }, false);
+
+        routing.set_start_dragend(indoor_state.do_routing_start);
+        routing.set_stop_dragend(indoor_state.do_routing_stop);
     }
 
 
@@ -169,6 +198,10 @@ class machine extends Abstractmachine {
     }
 
 
+    // get_indoor_data() {
+    //     return machine.indoor_data;
+    // }
+
     do() {
         this.state.do()
     }
@@ -176,13 +209,35 @@ class machine extends Abstractmachine {
     setFloorState() {
         this.setState(floor_state);
     }
+    set_indoor_state() {
+        this.setState(indoor_state);
+    }
     setState(state) {
+        if (state === building_state) {
+            machine.controls.switch_to_building_geocoder();
+        } else {
+            machine.controls.switch_to_indoor_geocoder();
+        }
+
         this.state = state
         this.state.do()
     }
     getState() {
         return this.state;
     }
+
+    is_building_state() {
+        return this.state === building_state;
+    }
+
+    is_floor_state() {
+        return this.state === floor_state;
+    }
+
+    is_indoor_state() {
+        return this.state === indoor_state;
+    }
+
     on_building_selected({ feature: {} }) {
         this.state.on_building_selected({ feature })
     }
@@ -205,116 +260,195 @@ class machine extends Abstractmachine {
             // console.log('building_state.constructor.name:', building_state.constructor.name)
             null;
         }
-        machine.map.setFeatureState(feature_ref, property);
+        // console.log('source:', source);
+        if (source === 'footprint') {
+            // machine.map.setFeatureState(feature_ref, property);
+        } else {
+            machine.map.setFeatureState(feature_ref, property);
+        }
 
     }
-    parse(data, ext) {
-        let geojson;
-        if (ext === "geojson") {
-            geojson = JSON.parse(data);
+    set_building_id(building_id) {
+        // console.log("Try to go to floor state")
+        // machine.map.on('sourcedata', function(e) {
+        //     if (e.isSourceLoaded) {
+        //         console.log("event e.source:", e.source);
+        //         console.log("event e:", e);
+        //     }
 
-            // console.log('-geojson:', geojson)
-            toolbox.lineOrPolygonize(geojson);
-            // for (let feature of geojson.features) {
-            //     if (
-            //         (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon') &&
-            //         !toolbox.poly_vs_line(feature.properties)
-            //     ) {
-            //         feature.geometry = polygonToLine(feature).geometry;
-            //     } else if (
-            //         (feature.geometry.type === 'LineString' || feature.geometry.type === 'MultiLineString') &&
-            //         toolbox.poly_vs_line(feature.properties)
-            //     ) {
-            //         if (feature.geometry.type === 'LineString') {
-            //             if (feature.geometry.coordinates.length >= 4) {
-            //                 // console.log('LineString feature.geometry.coordinates:', feature.geometry.coordinates);
-            //                 // polygons.add(feature.geometry.coordinates);
-            //                 feature.geometry = lineToPolygon(feature).geometry;
-            //             }
-            //         } else if (feature.geometry.type === 'MultiLineString') {
-            //             console.log('MultiLineString feature.geometry.coordinates:', feature.geometry.coordinates);
-            //             feature.geometry = lineToPolygon(feature).geometry;
-            //         }
-            //         // for (let polygon of polygons.filter(polygon.length >= 4)) {
-            //         // feature.geometry = lineToPolygon(feature).geometry;
-            //         // }
-            //     }
-            // }
-        } else if (ext === "osm") {
-            // console.log('OSM not supported yet');
-            // let xml_text = "<osm></osm>";
-            // console.log('xml_text:', xml_text);
-            let parser = new DOMParser();
-            let xml = parser.parseFromString(data, 'text/xml');
-            // console.log('xml:', xml);
-            geojson = osmtogeojson(xml, { flatProperties: false });
-            console.log('geojson:', geojson);
-            // var sampleStr = text.slice(0, 100).toString();
-
-            // let parser = new DOMParser();
-            // let xmlDoc = parser.parseFromString(text, "text/xml");
-
-            // geojson = osmtogeojson(
-            //     xmlDoc, {
-            //         flatProperties: true,
-            //         polygonFeatures: function(properties) {
-            //             if (properties.indoor != null && properties.indoor === 'room' ||
-            //                 properties.building
-            //             )
-            //                 return false;
-            //             return false
-            //         }
-            //     }
-            // )
+        //     if (e.isSourceLoaded && e.source.type === "geojson" && e.sourceId === "footprint") {
+        //         console.log("openIndoorMachine.data_mode:", openIndoorMachine.data_mode);
+        //         if (openIndoorMachine.data_mode === "drag_n_drop") {
+        //             console.log("Go to indoor state")
+        //             openIndoorMachine.setState(indoor_state);
+        //         }
+        //     }
+        // });
+    }
+    set_level(level) {
+        // if (openIndoorMachine.data_mode === "drag_n_drop") {
+        //     openIndoorMachine.setState(indoor_state);
+        // }
+    }
+    set_layer(layer) {
+        // load layer files
+        // import indoor_layers from './layers/indoor.json';
+        let layer_url = undefined;
+        if (layer.match(/\.json$/i)) {
+            layer_url = layer;
+            this._set_layer(layer_url, { set_default: true });
+        } else {
+            for (let mode_ of["indoor"]) {
+                layer_url = 'https://app.openindoor.io/layer/' + mode_ + '-' + layer + '.json';
+                this._set_layer(layer_url, { set_default: true });
+            }
         }
+        // fire
+        // machine.get_singleton().getState().set_layer(layer);
+    }
+
+    set_default_layer() {
+        for (let layer of machine.indoor_layers) {
+            machine.map.removeLayer(layer.id);
+        }
+        machine.indoor_layers = default_indoor_layers;
+        for (let layer of machine.indoor_layers) {
+            machine.map.addLayer(layer);
+        }
+    }
+
+    _set_layer(layer_url, option = { set_default: false }) {
+        let indoor_layers_ = undefined;
+        fetch(layer_url).then(function(response) {
+            var contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                return response.json().then(function(json) {
+                    console.log('json style:', json);
+                    indoor_layers_ = json;
+                    if (indoor_layers_ != null) {
+                        for (let layer of machine.indoor_layers) {
+                            // console.log('remove:', layer.id);
+                            machine.map.removeLayer(layer.id);
+                        }
+                        if (option.set_default) {
+                            default_indoor_layers = indoor_layers_;
+                        }
+                        machine.indoor_layers = indoor_layers_;
+                        for (let layer of machine.indoor_layers) {
+                            // console.log('load:', layer.id);
+                            machine.map.addLayer(layer);
+                            // machine.map.setLayoutProperty(layer.id, "visibility", "visible")
+                        }
+                    }
+
+                });
+            } else {
+                console.log("Oops, no JSON!");
+            }
+        });
+    }
+    parse(data, ext, building_id, level, feature_key, feature_id) {
+        console.log('going to parse !');
+        let [building_data, floor_data, indoor_data] = toolbox.parse(data, ext, building_id);
+
+
+
+
+        // let geojson;
+        // if (ext === "geojson") {
+        //     geojson = JSON.parse(data);
+
+        //     // console.log('-geojson:', geojson)
+        //     toolbox.lineOrPolygonize(geojson);
+        //     // for (let feature of geojson.features) {
+        //     //     if (
+        //     //         (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon') &&
+        //     //         !toolbox.poly_vs_line(feature.properties)
+        //     //     ) {
+        //     //         feature.geometry = polygonToLine(feature).geometry;
+        //     //     } else if (
+        //     //         (feature.geometry.type === 'LineString' || feature.geometry.type === 'MultiLineString') &&
+        //     //         toolbox.poly_vs_line(feature.properties)
+        //     //     ) {
+        //     //         if (feature.geometry.type === 'LineString') {
+        //     //             if (feature.geometry.coordinates.length >= 4) {
+        //     //                 // console.log('LineString feature.geometry.coordinates:', feature.geometry.coordinates);
+        //     //                 // polygons.add(feature.geometry.coordinates);
+        //     //                 feature.geometry = lineToPolygon(feature).geometry;
+        //     //             }
+        //     //         } else if (feature.geometry.type === 'MultiLineString') {
+        //     //             console.log('MultiLineString feature.geometry.coordinates:', feature.geometry.coordinates);
+        //     //             feature.geometry = lineToPolygon(feature).geometry;
+        //     //         }
+        //     //         // for (let polygon of polygons.filter(polygon.length >= 4)) {
+        //     //         // feature.geometry = lineToPolygon(feature).geometry;
+        //     //         // }
+        //     //     }
+        //     // }
+        // } else if (ext === "osm") {
+        //     // console.log('OSM not supported yet');
+        //     // let xml_text = "<osm></osm>";
+        //     // console.log('xml_text:', xml_text);
+        //     let parser = new DOMParser();
+        //     let xml = parser.parseFromString(data, 'text/xml');
+        //     // console.log('xml:', xml);
+        //     geojson = osmtogeojson(xml, { flatProperties: false });
+        //     console.log('geojson:', geojson);
+        //     // var sampleStr = text.slice(0, 100).toString();
+
+        //     // let parser = new DOMParser();
+        //     // let xmlDoc = parser.parseFromString(text, "text/xml");
+
+        //     // geojson = osmtogeojson(
+        //     //     xmlDoc, {
+        //     //         flatProperties: true,
+        //     //         polygonFeatures: function(properties) {
+        //     //             if (properties.indoor != null && properties.indoor === 'room' ||
+        //     //                 properties.building
+        //     //             )
+        //     //                 return false;
+        //     //             return false
+        //     //         }
+        //     //     }
+        //     // )
+        // }
 
         openIndoorMachine.data_mode = "drag_n_drop"
 
-        geojson.features = geojson.features.filter(feat_ => (feat_.properties !== null))
+        // geojson.features = geojson.features.filter(feat_ => (feat_.properties !== null))
 
-        // Set ids and fix properties
-        if (geojson.features.filter(feat_ => isNaN(feat_.id)).length > 0) {
-            let i = 0;
-            for (let feat_ of geojson.features) {
-                // let polygons = polygonize(feat_)
-                i++;
-                feat_.id = i;
-                feat_.properties.osm_id = "x" + i;
-            }
-        }
+        // // Set ids and fix properties
+        // if (geojson.features.filter(feat_ => isNaN(feat_.id)).length > 0) {
+        //     let i = 0;
+        //     for (let feat_ of geojson.features) {
+        //         // let polygons = polygonize(feat_)
+        //         i++;
+        //         feat_.id = i;
+        //         feat_.properties.osm_id = "x" + i;
+        //     }
+        // }
 
+
+        // reset pins
+        // for (let layer of pins_layers) {
+        //     if (machine.map.getLayer(layer.id) === undefined)
+        //         continue;
+        //     machine.map.removeLayer(layer.id);
+        // }
 
         // reset footprint source and layer
-        for (let layer of footprint_layers) {
-            if (machine.map.getLayer(layer.id) === undefined)
-                continue;
-            machine.map.removeLayer(layer.id);
-        }
-        machine.map.removeSource('footprint');
-        let building_data = {
-            type: "FeatureCollection",
-            features: geojson.features.filter(feat_ => ('building' in feat_.properties))
-        }
-        console.log('building_data:', building_data)
 
-        machine.map.addSource('footprint', {
-            "type": "geojson",
-            "data": building_data
-        });
-        for (let layer of footprint_layers) {
-            if (machine.map.getLayer(layer.id) !== undefined)
-                continue;
-            delete layer["source-layer"];
-            machine.map.addLayer(layer);
-        }
+        // let building_data = {
+        //     type: "FeatureCollection",
+        //     features: geojson.features.filter(feat_ => ('building' in feat_.properties))
+        // }
+        // console.log('building_data:', building_data)
 
+        // toolbox.fix_indoor(geojson)
 
-        toolbox.fix_indoor(geojson)
-        machine.floors_data = clone(geojson);
-        machine.map.getSource("shape_source").setData(machine.floors_data);
-
-        machine.indoor_data = geojson;
-        toolbox.openindoorize(geojson)
+        machine.floors_data = floor_data;
+        machine.indoor_data = indoor_data;
+        // toolbox.openindoorize(geojson);
 
 
 
@@ -330,17 +464,40 @@ class machine extends Abstractmachine {
         // }
         // console.log('building_data:', building_data)
 
-        // init building footprint data
+        // Set building footprint data
+        for (let layer of footprint_layers) {
+            if (machine.map.getLayer(layer.id) === undefined)
+                continue;
+            machine.map.removeLayer(layer.id);
+        }
+        machine.map.removeSource('footprint');
+        machine.map.addSource('footprint', {
+            "type": "geojson",
+            "data": building_data
+        });
+        for (let layer of footprint_layers) {
+            if (machine.map.getLayer(layer.id) !== undefined)
+                continue;
+            delete layer["source-layer"];
+            machine.map.addLayer(layer);
+        }
+        // Set floor data
+        machine.map.getSource("shape_source").setData(machine.floors_data);
 
-
+        // Set indoor data
         machine.map.getSource("indoor_source").setData(machine.indoor_data);
         let center = centroid(machine.floors_data).geometry.coordinates;
         console.log('center:', center);
-        machine.map.flyTo({
+        machine.map.jumpTo({
             center: center,
-            zoom: 16
+            zoom: 16,
         });
-        openIndoorMachine.setState(building_state);
+        if (machine.get_singleton().init_mode === "indoor_state") {
+            indoor_state.set_feature(feature_key, feature_id);
+            openIndoorMachine.setState(indoor_state);
+        } else {
+            openIndoorMachine.setState(building_state);
+        }
     }
     handleGeojsonDropped(self, e) {
         e.stopPropagation();
@@ -414,10 +571,14 @@ class Building extends Abstractmachine {
     do() {
         let self = this
             // machine.map.off('pitch', openIndoorMachine.on_pitch());
+
+
+
         machine.map.off('pitch', indoor_state.on_pitch_e);
         machine.map.off('pitch', floor_state.on_pitch_e);
 
         indoor_state.disable_display_info();
+        indoor_state.routing_reset();
 
         machine.map.setMaxPitch(60);
 
@@ -427,8 +588,14 @@ class Building extends Abstractmachine {
 
         machine.controls.deactivateLevelControl();
 
-        machine.map.setMaxZoom(24);
+        // machine.controls.enable_building_geocoder();
+        // machine.controls.disable_indoor_geocoder();
+
+        machine.map.setMaxZoom(19);
         machine.map.setMinZoom(0);
+        if (machine.map.getZoom() > 19) {
+
+        }
 
         // Enable raster tiles
         if (machine.map.getLayer("simple-tiles") !== undefined)
@@ -446,7 +613,7 @@ class Building extends Abstractmachine {
             machine.map.setLayoutProperty("shape-area-extrusion-indoor-00", 'visibility', 'none')
 
         // Disable indoor
-        for (let layer_ of indoor_layers) {
+        for (let layer_ of machine.indoor_layers) {
             if (machine.map.getLayer(layer_.id) !== undefined)
                 machine.map.setLayoutProperty(layer_.id, 'visibility', 'none')
         }
@@ -465,6 +632,7 @@ class Building extends Abstractmachine {
         );
 
         let on_building_click_e = (e) => {
+            // console.log(machine.map.getBounds());
             if (!('features' in e && e.features.length > 0))
                 return
 
@@ -555,6 +723,20 @@ class Building extends Abstractmachine {
     }
 
     on_building_selected({ feature, disable }) {
+        if (
+            feature.properties != null &&
+            feature.properties.building != null &&
+            feature.properties.building != "no" &&
+            feature.properties.shop != null &&
+            feature.properties.shop === "mall"
+        ) {
+            console.log('set mall layer !')
+            machine.get_singleton()._set_layer('/layer/indoor-mall.json', { set_default: false });
+        } else {
+            console.log('back to default layer !')
+            machine.get_singleton().set_default_layer();
+        }
+
         if (building_state.loadingId != undefined) {
             return
         }
@@ -601,6 +783,7 @@ class Building extends Abstractmachine {
             } else {
                 openIndoorMachine.setState(floor_state)
             }
+            // machine.controls.disable_building_geocoder();
 
         } else {
             building_state.loadingId = building_state.clickedBuildingId
@@ -628,12 +811,12 @@ class Building extends Abstractmachine {
             let request = '[out:json];' +
                 (building_id.substring(0, 1) === 'a' ? 'rel' : 'way') +
                 '(' + building_id.substring(1) + ');' +
-                'map_to_area->.a;nwr(area.a);' +
-                'out geom(' +
-                ((((bb[0] - 90) % 180)) + 90) + ',' +
-                bb[1] + ',' +
-                ((((bb[2] - 90) % 180)) + 90) + ',' +
-                bb[3] + ');';
+                'map_to_area->.a;nwr(area.a); out;';
+            // 'out geom(' +
+            // bb[1] + ',' +
+            // bb[0] + ',' +
+            // bb[3] + ',' +
+            // bb[2] + ');';
             console.log('request:', request);
             // let polygon = JSON.parse(JSON.stringify(my_building.geometry.coordinates[0]))
 
@@ -653,8 +836,9 @@ class Building extends Abstractmachine {
             let center = centroid(my_building).geometry.coordinates
             console.log('center:', center)
 
-            wait_marker.setLngLat(center)
-            el.style.display = "block";
+            spinner_marker.setLngLat(center)
+            spinner.style.display = "block";
+            spinner.style.visibility = "visible";
 
             let my_geojson = fetch("https://overpass-api-world.openindoor.io/api/interpreter", {
                 method: 'POST',
@@ -696,7 +880,7 @@ class Building extends Abstractmachine {
                 toolbox.fix_indoor(machine.indoor_data)
                 toolbox.openindoorize(machine.indoor_data)
 
-                el.style.display = "none";
+                spinner.style.display = "none";
 
                 // Manage available levels
                 let levels = [...new Set(machine.floors_data.features.map(
@@ -708,9 +892,24 @@ class Building extends Abstractmachine {
                 })
                 machine.controls.setLevels(levels)
 
-                console.log('indoor_geojson:', machine.indoor_data)
+                console.log('floors_data:', machine.floors_data)
+                console.log('indoor_data:', machine.indoor_data)
                 machine.map.getSource("shape_source").setData(machine.floors_data);
+                let buggy = machine.floors_data.features.filter(feat_ => (feat_.properties == null || feat_.properties.min_level == null));
+                console.error('buggy:', buggy);
                 machine.map.getSource("indoor_source").setData(machine.indoor_data);
+
+                // let footway = {
+                //     "type": "FeatureCollection",
+                //     "features": machine.indoor_data.features.filter(
+                //         feat_ => (
+                //             feat_.properties.min_level === 1 &&
+                //             feat_.properties != null &&
+                //             feat_.properties.highway === "footway")
+                //     )
+                // };
+                // console.log('footway:', footway);
+
                 // machine.map.getSource("indoor_flat_source").setData(machine.indoor_data);
 
                 self.loadingId = undefined
@@ -756,7 +955,9 @@ class Floor extends Abstractmachine {
         this.hoveredLevel = undefined
     }
 
-
+    // on_set_indoor_level_action({ level }) {
+    //     machine.get_singleton().setState(indoor_state);
+    // }
 
     on_change_level_action({ level }) {
         let self = this;
@@ -841,7 +1042,7 @@ class Floor extends Abstractmachine {
         machine.controls.disable_floor_button();
         machine.controls.disable_indoor_button();
 
-        machine.map.setMaxZoom(24);
+        // machine.map.setMaxZoom(24);
 
         // let bb = bbox(machine.floors_data)
         // console.log('bbox:', bb)
@@ -864,7 +1065,7 @@ class Floor extends Abstractmachine {
         machine.map.setLayoutProperty("pins-layer", 'visibility', 'none')
 
         // Enable indoor
-        for (let layer of indoor_layers) {
+        for (let layer of machine.indoor_layers) {
             machine.map.setLayoutProperty(layer.id, "visibility", "none")
         }
 
@@ -981,21 +1182,23 @@ class Indoor extends Abstractmachine {
 
     constructor(map) {
         super(map);
+        this.feature_id_init = undefined;
+        this.feature_key = "id";
+
         this.hovered = {
             feature: undefined
         }
         this.popup = new maplibregl.Popup({
-            closeButton: false,
+            closeButton: true,
             closeOnClick: false
         });
+        // let routing = machine.get_singleton().routing;
+        // routing.set_start_dragend(this.routing);
         let self = this;
         this.on_indoor_click_e = (e) => {
-            self.remove_info()
+            console.log('on_indoor_click_e:', e);
             const features = machine.map.queryRenderedFeatures(e.point);
-            if (features.length > 0) {
-                let coordinates = [e.lngLat.lng, e.lngLat.lat];
-                self.display_info(features[0], coordinates);
-            }
+            self.mark(self, features, e.lngLat);
         }
         this.on_indoor_hover_e = (e) => {
             // console.log('mousemove');
@@ -1007,28 +1210,157 @@ class Indoor extends Abstractmachine {
         }
     }
 
+    mark(self, features, lngLat) {
+        self.remove_info()
+        if (features.length > 0) {
+            let coordinates = [lngLat.lng, lngLat.lat];
+            let routing = machine.get_singleton().routing;
+            if (!routing.is_start_defined()) {
+                self.do_routing_start(coordinates);
+            } else {
+                self.do_routing_stop(coordinates);
+            }
+
+            // var marker = new maplibregl.Marker()
+            //     .setLngLat(route.get_start().geometry.coordinates)
+            //     .addTo(machine.map);
+            self.display_info(features[0], coordinates);
+        }
+
+    }
+    set_feature(feature_key, feature_id) {
+        this.feature_key = feature_key;
+        this.feature_id_init = feature_id;
+        console.log('this.feature_id_init :', this.feature_id_init);
+    }
+
+    do_routing_start(coordinates) {
+        console.log("do_routing_start");
+        console.log('do_routing_start - coordinates:', coordinates);
+        indoor_state.do_routing(coordinates, 'start');
+    }
+    do_routing_stop(coordinates) {
+        indoor_state.do_routing(coordinates, 'stop');
+    }
+
+    routing_reset() {
+        machine.get_singleton().routing.reset();
+        if (machine.map.getLayer('route') != null) {
+            machine.map.removeLayer('route');
+        }
+    }
+
+    do_routing(coordinates, start_stop) {
+        console.log("level:", machine.getLevel());
+        let routing = machine.get_singleton().routing;
+        let ways = {
+            "type": "FeatureCollection",
+            "features": machine.indoor_data.features.filter(
+                (feat_) => {
+                    return (
+                        feat_.properties != null &&
+                        feat_.properties.highway === "footway" &&
+                        (parseInt(feat_.properties.level) === machine.getLevel() || (machine.getLevel() === 0 && feat_.properties.level == null))
+                    )
+                }
+            )
+        };
+        console.log('ways:', ways);
+        routing.set_ways(ways);
+        routing.set_obstacles({
+            "type": "FeatureCollection",
+            "features": machine.indoor_data.features.filter(
+                feat_ =>
+                feat_.properties != null &&
+                (feat_.properties.indoor === "room" || feat_.properties.indoor === "wall") &&
+                feat_.geometry.type === "Polygon"
+            )
+        });
+        // routing.remove_start();
+        // routing.set_closest_point(coordinates);
+        if (start_stop === 'start') {
+            routing.set_closest_start(coordinates);
+        } else {
+            routing.set_closest_stop(coordinates);
+        }
+
+        if (!routing.is_start_defined() || !routing.is_stop_defined()) {
+            return;
+        }
+
+        // let path = routing.get_shortest_path();
+        let path = routing.get_path();
+
+        console.log("path:", path);
+        // Render path here
+        let my_source = machine.map.getSource('route');
+        if (my_source === undefined) {
+            machine.map.addSource('route', {
+                'type': 'geojson',
+                'data': path
+            });
+        } else {
+            my_source.setData(path)
+        }
+
+        let my_layer = machine.map.getLayer('route');
+        // if (machine.map.)
+        if (my_layer === undefined) {
+            machine.map.addLayer({
+                'id': 'route',
+                'type': 'line',
+                'source': 'route',
+                'layout': {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                'paint': {
+                    "line-opacity": 0.8,
+                    "line-dasharray": [2, 2],
+                    'line-color': '#4286f4',
+                    'line-width': 8
+                }
+            });
+        }
+
+    }
+
     display_info(feature, coordinates) {
-        // let feature_ = features[0]
-        // Change the cursor style as a UI indicator.
-        // machine.map.getCanvas().style.cursor = 'pointer';
+        let modal = machine.get_singleton().modal;
+        if (modal != null) {
+            machine.get_singleton().modal.open().setHTML(
+                Info.get_description(feature, coordinates)
+            );
+        }
+        let popup = machine.get_singleton().popup;
+        if (popup != null) {
+            let description = Info.get_description(feature, coordinates);
+            console.log('description:', description);
+            if (description) {
+                machine.get_singleton().popup.open(feature).setHTML(description);
+            }
+        }
 
-        // let coordinates = centroid(e.features[0]).geometry.coordinates;
-        let desc = feature.properties;
-        if (desc.geometry != null)
-            desc.properties.geometry_type = desc.geometry.type;
-        var description = JSON.stringify(desc, null, 4).replace(/\n\r?/g, '<br />');
-
-        this.popup.setLngLat(coordinates).setHTML(description).addTo(machine.map);
+        // this.popup.setLngLat(
+        //     coordinates
+        // ).setHTML(
+        //     Info.get_description(feature)
+        // ).addTo(machine.map);
     }
 
     remove_info() {
-        // machine.map.getCanvas().style.cursor = '';
-        this.popup.remove();
-
+        let modal = machine.get_singleton().modal;
+        if (modal != null) {
+            machine.get_singleton().modal.close();
+        }
+        let popup = machine.get_singleton().popup;
+        if (popup != null) {
+            machine.get_singleton().popup.close();
+        }
     }
 
     disable_display_info() {
-        this.remove_info(this.popup);
+        this.remove_info();
         let self = this;
         machine.map.off(
             'click',
@@ -1055,14 +1387,16 @@ class Indoor extends Abstractmachine {
                 indoor_state.filter_on_level({
                     level_min: level,
                     level_max: level + 1
-                })
+                });
+                // Remove routing markers
+                self.routing_reset();
             }
         }
     }
 
 
     filter_on_level({ level_min, level_max }) {
-        for (let layer of JSON.parse(JSON.stringify(indoor_layers))) {
+        for (let layer of JSON.parse(JSON.stringify(machine.indoor_layers))) {
             layer.filter = [
                 "all",
                 layer.filter, [
@@ -1109,6 +1443,7 @@ class Indoor extends Abstractmachine {
         machine.map.on('pitch', indoor_state.on_pitch_e);
 
         // machine.map.on('pitch', openIndoorMachine.on_pitch());
+        machine.map.setMaxZoom(24);
 
         machine.map.setMaxPitch(85);
         machine.controls.enable_building_button();
@@ -1116,7 +1451,7 @@ class Indoor extends Abstractmachine {
         machine.controls.disable_indoor_button();
 
         // Enable indoor layout
-        for (let layer of indoor_layers) {
+        for (let layer of machine.indoor_layers) {
             machine.map.setLayoutProperty(layer.id, "visibility", "visible")
         }
 
@@ -1143,6 +1478,42 @@ class Indoor extends Abstractmachine {
         }
 
         machine.map.on('moveend', flyend);
+
+        machine.map.on('sourcedata', (mde) => {
+            // console.log('mde:', mde);
+            // console.log('self.feature_id_init:', self.feature_id_init);
+            if (!(mde.sourceId === "indoor_source" &&
+                    mde.isSourceLoaded &&
+                    mde.source.type === "geojson" &&
+                    mde.source.data != null &&
+                    mde.source.data.features != null &&
+                    self.feature_id_init != null
+                )) {
+                return;
+            }
+            console.log('map_data_event:', mde);
+            let features = mde.source.data.features;
+            let my_feature = features.find(
+                feat_ =>
+                feat_.properties != null &&
+                feat_.properties[self.feature_key] === self.feature_id_init
+            );
+            console.log('my_feature:', my_feature);
+            let feature_id = self.feature_id_init;
+            let my_centroid = centroid(my_feature).geometry.coordinates;
+            self.mark(
+                self, [my_feature], {
+                    lng: my_centroid[0],
+                    lat: my_centroid[1],
+                }
+            );
+
+            // self.on_indoor_click_e({
+            //     point: "",
+            // })
+            self.feature_id_init = undefined;
+        });
+
         // remove popup on click on default grouns
 
 
@@ -1170,7 +1541,7 @@ class Indoor extends Abstractmachine {
             self.on_indoor_hover_e
         );
 
-        for (let layer of indoor_layers.filter(
+        for (let layer of machine.indoor_layers.filter(
                 layer_ => (
                     layer_.type === "line" ||
                     layer_.type === "fill-extrusion"
@@ -1243,30 +1614,32 @@ let building_state = undefined;
 let floor_state = undefined;
 let indoor_state = undefined;
 
-let el = document.createElement('div');
-el.className = 'lds-spinner';
+let spinner = document.createElement('div');
+spinner.className = 'lds-spinner';
 
 for (let i = 0; i < 12; i++) {
-    el.appendChild(document.createElement('div'));
+    spinner.appendChild(document.createElement('div'));
 }
 
-el.addEventListener('click', function() {
+spinner.addEventListener('click', function() {
     window.alert(marker.properties.message);
 });
 
-let wait_marker = new maplibregl.Marker(el)
+let spinner_marker = new maplibregl.Marker(spinner)
 
-function openindoor_machine(map) {
-    console.log('indoor_layers:', indoor_layers)
+function openindoor_machine(map, modal, popup, routing, info) {
+    console.log('machine.indoor_layers:', machine.indoor_layers)
     machine.map = map
-    wait_marker
+    spinner_marker
         .setLngLat([0, 0])
         .addTo(machine.map);
+    spinner.style.visibility = "hidden";
 
     building_state = new Building(map)
     floor_state = new Floor(map);
     indoor_state = new Indoor(map);
-    openIndoorMachine = new machine(map);
+
+    openIndoorMachine = machine.get_singleton(map, modal, popup, routing, info);
 
     openIndoorMachine.do();
     return openIndoorMachine;

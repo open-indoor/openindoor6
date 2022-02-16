@@ -1,47 +1,48 @@
 import MaplibreGeocoder from '@maplibre/maplibre-gl-geocoder';
 import '@maplibre/maplibre-gl-geocoder/dist/maplibre-gl-geocoder.css';
+import center from '@turf/center';
 
 
 // https://github.com/opening-hours/opening_hours.js/blob/master/examples/simple_index.html
 // import OpeningHours from 'opening_hours';
 
-
-var GeoApi = {
-    forwardGeocode: async(config) => {
-        const features = []
-        try {
-            let request = "https://nominatim.openstreetmap.org/search?q=" + config.query + "&format=geojson&polygon_geojson=1&addressdetails=1"
-            const response = await fetch(request);
-            const geojson = await response.json();
-            for (let feature of geojson.features) {
-                let center = [
-                    feature.bbox[0] + (feature.bbox[2] - feature.bbox[0]) / 2,
-                    feature.bbox[1] + (feature.bbox[3] - feature.bbox[1]) / 2
-                ];
-                let point = {
-                    type: "Feature",
-                    geometry: {
-                        type: "Point",
-                        coordinates: center
-                    },
-                    place_name: feature.properties.display_name,
-                    properties: feature.properties,
-                    text: feature.properties.display_name,
-                    place_type: ["place"],
-                    center: center
-                }
-                features.push(point)
-            }
-        } catch (e) {
-            console.error(`Failed to forwardGeocode with error: ${e}`);
-        }
-
-        return {
-            features: features,
-        }
+class InfoControl {
+    constructor() {
+        // this.on_button_pushed = () => {}
     }
-};
+    enable() {
+        this._info.disabled = false;
+    }
 
+    disable() {
+        this._info.disabled = true;
+    }
+
+    set_message(message) {
+        this._info.textContent = message;
+    }
+
+    // set_on_button_pushed(e) {
+    //     this.on_button_pushed = e
+    // }
+
+    onAdd(map) {
+        this._map = map;
+        let self = this;
+
+        this._info = document.createElement("div");
+        this._info.textContent = "Drag and drop here your local indoor data from .osm or .geojson files";
+        this._container = document.createElement("div");
+        this._container.className = "marquee";
+        this._container.appendChild(this._info);
+        return this._container;
+    }
+
+    onRemove() {
+        this._container.parentNode.removeChild(this._container);
+        this._map = undefined;
+    }
+}
 
 
 
@@ -160,6 +161,8 @@ class LevelControl {
         this._pitch = pitch;
         this._level_number = 0;
         this._levels = [this._level_number];
+        this.change_level_action = undefined;
+        this.indoor_level_action = undefined;
         // this.up_action = up_action
         // this.down_action = down_action
 
@@ -186,6 +189,9 @@ class LevelControl {
     }
     set_change_level_action(change_level_action) {
         this.change_level_action = change_level_action
+    }
+    set_indoor_level_action(indoor_level_action) {
+        this.indoor_level_action = indoor_level_action
     }
 
     // setUpAction(up_action) {
@@ -223,7 +229,9 @@ class LevelControl {
         this._down["aria-label"] = "Down";
 
         this._level.onclick = function() {
-            console.log('TODO: select indoor floor and deep inside')
+            // console.log('TODO: select indoor floor and deep inside')
+            self.indoor_level_action({ level: self._level_number });
+
         }
 
         this._up.onclick = function() {
@@ -475,9 +483,11 @@ class IndoorControl {
 class Controls {
 
 
-    on_geocoder_result(fn) {
-        this.geocoder.on('result', fn)
-    }
+    // on_building_geocoder_result(fn) {
+    //     this.geocoder.on('result', () => {
+    //         fn();
+    //     })
+    // }
 
     // machine.controls.set_on_building_event(() => {
     //     machine.setState(building)
@@ -521,6 +531,38 @@ class Controls {
         this.indoor_control.disable()
     }
 
+    switch_to_building_geocoder() {
+        console.log("switch to building geocoder");
+        this.geocoder.setGeocoderApi(this.building_geocoder_api);
+        this.geocoder.setZoom(17);
+        this.geocoder.setPlaceholder("Outdoor search");
+        // this.geocoder.setInput("");
+    }
+
+    switch_to_indoor_geocoder() {
+        console.log("switch to indoor geocoder");
+        this.geocoder.setGeocoderApi(this.indoor_geocoder_api);
+        this.geocoder.setZoom(20);
+        this.geocoder.setPlaceholder("Indoor search");
+        // this.geocoder.setInput("");
+    }
+
+    // enable_building_geocoder() {
+    //     if (!this.map.hasControl(this.building_geocoder))
+    //         this.map.addControl(this.building_geocoder, "top-right");
+
+    //     // if (this.map.hasControl(this.indoor_geocoder))
+    //     //     this.map.removeControl(this.indoor_geocoder, "top-right");
+    // }
+
+    // disable_building_geocoder() {
+    //     // if (this.map.hasControl(this.building_geocoder))
+    //     //     this.map.removeControl(this.building_geocoder, "top-right");
+
+    //     if (!this.map.hasControl(this.indoor_geocoder))
+    //         this.map.addControl(this.indoor_geocoder, "top-right");
+    // }
+
     activateLevelControl() {
         if (!(this.map.hasControl(this.levelControl)))
             this.map.addControl(this.levelControl, "top-left");
@@ -533,6 +575,11 @@ class Controls {
 
     set_change_level_action(change_level_action) {
         this.levelControl.set_change_level_action(change_level_action)
+
+    }
+
+    set_indoor_level_action(indoor_level_action) {
+        this.levelControl.set_indoor_level_action(indoor_level_action)
     }
 
     setLevel(level) {
@@ -547,30 +594,132 @@ class Controls {
         this.levelControl.setLevels(levels)
     }
 
-    constructor(map) {
+    constructor(map, machine) {
+
+        // this.building_geocoder_enabled = false;
         this.map = map
+            // this.machine = machine;
         this.building_control = new BuildingControl();
         this.floor_control = new FloorControl();
         this.indoor_control = new IndoorControl();
+        this.info_control = new InfoControl();
+
+        let self = this;
+
+        this.building_geocoder_api = {
+            forwardGeocode: async(config) => {
+                const features = [];
+                try {
+                    let request = "https://nominatim.openstreetmap.org/search?q=" + config.query + "&format=geojson&polygon_geojson=1&addressdetails=1"
+                    const response = await fetch(request);
+                    const geojson = await response.json();
+                    for (let feature of geojson.features) {
+                        let center_ = [
+                            feature.bbox[0] + (feature.bbox[2] - feature.bbox[0]) / 2,
+                            feature.bbox[1] + (feature.bbox[3] - feature.bbox[1]) / 2
+                        ];
+                        let point = {
+                            type: "Feature",
+                            geometry: {
+                                type: "Point",
+                                coordinates: center_
+                            },
+                            place_name: feature.properties.display_name,
+                            properties: feature.properties,
+                            text: feature.properties.display_name,
+                            place_type: ["place"],
+                            center: center_
+                        }
+                        features.push(point)
+                    }
+                } catch (e) {
+                    console.error(`Failed to forwardGeocode with error: ${e}`);
+                }
+                return {
+                    features: features,
+                }
+            }
+        };
+
         this.geocoder = new MaplibreGeocoder(
-            GeoApi, {
+            this.building_geocoder_api, {
+                flyTo: true,
+                clearAndBlurOnEsc: true,
+                clearOnBlur: true,
+                placeholder: "Outdoor search",
                 maplibregl: maplibregl
             }
         );
 
+        // this.building_geocoder = new MaplibreGeocoder(, {
+        //     flyTo: true,
+        //     maplibregl: maplibregl
+        // });
+
+        this.indoor_geocoder_api = {
+            forwardGeocode: async(config) => {
+                const features = [];
+                console.log("data:", machine.indoor_data);
+                for (let feature of machine.indoor_data.features) {
+                    if (feature.properties == null || feature.properties.name == null || feature.properties.feature_type !== "anchor")
+                        continue;
+                    // console.log('feature:', feature);
+                    // console.log('config.query:', config.query);
+                    if (feature.properties.name.toLowerCase().includes(config.query.toLowerCase())) {
+                        let center_ = center(feature).geometry.coordinates;
+                        let point = {
+                            type: "Feature",
+                            geometry: {
+                                type: "Point",
+                                coordinates: center_
+                            },
+                            // place_name: feature.properties.min_level + ' - ' + feature.properties.name,
+                            place_name: feature.properties.name,
+                            properties: feature.properties,
+                            text: feature.properties.name,
+                            place_type: ["place"],
+                            center: center_
+                        }
+                        console.log('point:', point);
+
+                        features.push(point)
+                    }
+                }
+                return {
+                    features: features,
+                }
+            }
+        };
+
+        this.geocoder.on('result', (e) => {
+            // Go to indoor view
+            if (!machine.get_singleton().is_building_state()) {
+                machine.get_singleton().set_indoor_state();
+            }
+            console.log('geocoder result:', e);
+            let feature = e.result;
+            if (feature.properties != null && feature.properties.min_level != null) {
+                self.levelControl.change_level_action({ level: parseInt(feature.properties.min_level) }).after();
+                self.levelControl._level_number = parseInt(feature.properties.min_level);
+                // console.log('index:', index)
+                self.levelControl._level.textContent = feature.properties.min_level;
+            }
+        })
+
+        // this.enable_building_geocoder();
+        // this.disable_indoor_geocoder();
         map.addControl(this.geocoder, "top-right");
 
         map.addControl(this.building_control, "top-left");
         map.addControl(this.floor_control, "top-left");
         map.addControl(this.indoor_control, "top-left");
+        map.addControl(this.info_control, "bottom-right");
 
         this.levelControl = new LevelControl({
             minpitchzoom: 11,
         })
 
         // map.addControl(new PitchToggle({ minpitchzoom: 11 }), "top-left");
-
-
 
         map.addControl(new maplibregl.GeolocateControl({
             positionOptions: {
@@ -594,13 +743,7 @@ class Controls {
             visualizePitch: true
         });
         map.addControl(nav, 'top-right');
-
-
-
     }
-
-
-
 }
 
-export default Controls
+export default Controls;

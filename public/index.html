@@ -1,23 +1,26 @@
-<!-- src/index.html -->
 <!DOCTYPE html>
 <html lang="fr">
 
 <head>
-    <!-- <meta charset="UTF-8"> -->
-    <!-- <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"> -->
-    <!-- <meta charset="UTF-8" name="viewport" content="user-scalable=no"> -->
     <meta charset="UTF-8" name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>OpenIndoor6</title>
-    <script src="https://unpkg.com/maplibre-gl@2.0.0-pre.6/dist/maplibre-gl.js"></script>
-    <link href="https://unpkg.com/maplibre-gl@2.0.0-pre.6/dist/maplibre-gl.css" rel="stylesheet" />
+    <meta name="description" content="OpenIndoor dev is an 3D indoor map exploration solution.">
+    <title>OpenIndoor app dev</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="white" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="images/openindoor-icon-152.png">
+    <meta name="theme-color" content="white" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="app7">
+    <meta name="msapplication-TileImage" content="images/openindoor-icon-144.png">
+    <meta name="msapplication-TileColor" content="#FFFFFF">
 
-    <script src="https://unpkg.com/three@0.135/build/three.min.js"></script>
-    <script src="https://unpkg.com/three@0.135/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://unpkg.com/maplibre-gl@2.1.6/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@2.1.6/dist/maplibre-gl.css" rel="stylesheet" />
+    <script src="https://unpkg.com/tinyqueue@2.0.0/tinyqueue.min.js"></script>
 
-
-    <!-- <script src="https://unpkg.com/osmtogeojson@3.0.0-beta.4/osmtogeojson.js"></script> -->
-
-    <!-- <link rel="stylesheet" href="main.css"> -->
+    <script src="https://app-dev.openindoor.io/openindoor.js"></script>
 </head>
 
 <body>
@@ -32,6 +35,20 @@
         gtag('js', new Date());
 
         gtag('config', 'G-FEV94XLJ4Q');
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for (let registration of registrations) {
+                registration.unregister()
+            }
+        })
+        let map = new openindoor();
+
+        window.onload = () => {
+            'use strict';
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker
+                    .register('./sw.js');
+            }
+        }
     </script>
     <!-- <script src="main.js"></script> -->
 </body>

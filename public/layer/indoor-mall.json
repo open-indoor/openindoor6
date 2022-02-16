@@ -1,0 +1,1319 @@
+[{
+    "id": "area-fill",
+    "type": "fill",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "visibility": "none",
+    "filter": [
+        "all", [
+            "has",
+            "indoor"
+        ],
+        [
+            "any", [
+                "==", [
+                    "get",
+                    "indoor"
+                ],
+                "area"
+            ],
+            [
+                "==", [
+                    "get",
+                    "indoor"
+                ],
+                "corridor"
+            ]
+
+        ],
+        [
+            "==", ["geometry-type"],
+            "Polygon"
+        ]
+    ],
+    "paint": {
+        "fill-opacity": 1,
+        "fill-color": "#fafafa",
+        "fill-outline-color": "#000000"
+    }
+}, {
+    "id": "indoor-lines",
+    "type": "line",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "visibility": "none",
+    "filter": [
+        "any", [
+            "has",
+            "indoor"
+        ],
+        [
+            "has",
+            "level"
+        ]
+    ],
+    "paint": {
+        "line-opacity": 0.1,
+        "line-color": "#000000",
+        "line-width": 1
+    }
+}, {
+    "id": "toilets-unit-fill",
+    "type": "fill",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "visibility": "none",
+    "filter": [
+        "all", [
+            "has",
+            "feature_type"
+        ],
+        [
+            "==", [
+                "get",
+                "feature_type"
+            ],
+            "unit"
+        ],
+        [
+            "any", [
+                "all", [
+                    "has",
+                    "amenity"
+                ],
+                [
+                    "in",
+                    "toilet", [
+                        "get",
+                        "amenity"
+                    ]
+
+                ]
+            ],
+            [
+                "all", [
+                    "has",
+                    "room"
+                ],
+                [
+                    "in",
+                    "toilet", [
+                        "get",
+                        "room"
+                    ]
+
+                ]
+            ],
+            [
+                "all", [
+                    "has",
+                    "toilets"
+                ],
+                [
+                    "!=", [
+                        "get",
+                        "toilets"
+                    ],
+                    "no"
+                ]
+            ],
+            [
+                "all", [
+                    "has",
+                    "toilet"
+                ],
+                [
+                    "!=", [
+                        "get",
+                        "toilet"
+                    ],
+                    "no"
+                ]
+            ]
+        ]
+    ],
+    "paint": {
+        "fill-opacity": 1,
+        "fill-color": "#dcdcff",
+        "fill-outline-color": "#000000"
+    }
+}, {
+    "id": "amenity-unit-fill",
+    "type": "fill",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "visibility": "none",
+    "filter": [
+        "all", [
+            "has",
+            "feature_type"
+        ],
+        [
+            "==", [
+                "get",
+                "feature_type"
+            ],
+            "unit"
+        ],
+        [
+            "has",
+            "amenity"
+        ]
+    ],
+    "paint": {
+        "fill-opacity": 1,
+        "fill-color": [
+            "case", ["in", ["get", "amenity"],
+                ["literal", ["restaurant", "cafe", "fast_food", "bakery"]]
+            ],
+            "#f7e7db", ["in", ["get", "amenity"],
+                ["literal", ["toilet", "toilets"]]
+            ],
+            "#dcdcff",
+            "#ffffff"
+        ],
+        "fill-outline-color": "#000000"
+    }
+}, {
+    "id": "railway-line",
+    "type": "line",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "visibility": "none",
+    "filter": [
+        "all", [
+            "==", ["geometry-type"],
+            "LineString"
+        ],
+        [
+            "any", [
+                "all", [
+                    "has",
+                    "railway"
+                ],
+                [
+                    "==", [
+                        "get",
+                        "railway"
+                    ],
+                    "rail"
+                ]
+            ],
+            [
+                "all", [
+                    "has",
+                    "route"
+                ],
+                [
+                    "==", [
+                        "get",
+                        "route"
+                    ],
+                    "train"
+                ]
+            ]
+
+        ]
+    ],
+    "paint": {
+        "line-opacity": 1,
+        "line-dasharray": [2, 2],
+        "line-color": "#646464",
+        "line-width": 10
+    }
+}, {
+    "id": "highway-footway-line",
+    "type": "line",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "visibility": "none",
+    "filter": [
+        "all", [
+            "has",
+            "highway"
+        ],
+        [
+            "==", [
+                "get",
+                "highway"
+            ],
+            "footway"
+        ],
+        [
+            "!", [
+                "has",
+                "conveying"
+            ]
+        ],
+        [
+            "==", ["geometry-type"],
+            "LineString"
+        ]
+    ],
+    "paint": {
+        "line-opacity": 1,
+        "line-color": "#f8b29c",
+        "line-width": 20
+    }
+}, {
+    "id": "highway-steps-line",
+    "type": "line",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "visibility": "none",
+    "filter": [
+        "all", [
+            "has",
+            "highway"
+        ],
+        [
+            "==", [
+                "get",
+                "highway"
+            ],
+            "steps"
+        ],
+        [
+            "!", [
+                "has",
+                "conveying"
+            ]
+        ],
+        [
+            "==", ["geometry-type"],
+            "LineString"
+        ]
+    ],
+    "paint": {
+        "line-opacity": 1,
+        "line-dasharray": [0.2, 0.2],
+        "line-color": "#f8b29c",
+        "line-width": 20
+    }
+}, {
+    "id": "footway-escalator-line",
+    "type": "line",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "visibility": "none",
+    "filter": [
+        "all", [
+            "has",
+            "highway"
+        ],
+        [
+            "in", [
+                "get",
+                "highway"
+            ],
+            [
+                "literal", ["footway", "steps"]
+            ]
+        ],
+        [
+            "has",
+            "conveying"
+        ],
+        [
+            "==", ["geometry-type"],
+            "LineString"
+        ]
+    ],
+    "paint": {
+        "line-opacity": 1,
+        "line-color": "#c2a9d4",
+        "line-width": 20
+    }
+}, {
+    "id": "highway-escalator-symbol",
+    "type": "symbol",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "visibility": "none",
+    "filter": [
+        "all", [
+            "has",
+            "conveying"
+        ],
+        [
+            "==", ["geometry-type"],
+            "LineString"
+        ]
+    ],
+    "layout": {
+        "icon-size": {
+            "base": 1,
+            "stops": [
+                [
+                    15,
+                    0.3
+                ],
+                [
+                    24,
+                    1
+                ]
+            ]
+        },
+        "icon-image": "conveying_64",
+        "icon-anchor": "center",
+        "icon-offset": [0, -32],
+        "symbol-spacing": 250,
+        "symbol-placement": "point",
+        "visibility": "visible",
+        "icon-optional": false,
+        "icon-allow-overlap": false
+    }
+}, {
+    "id": "poi-indoor-door",
+    "type": "symbol",
+    "source": "indoor_source",
+    "minzoom": 19,
+    "interactive": true,
+    "filter": ["any", [
+            "has",
+            "door"
+        ],
+        [
+            "all", [
+                "has",
+                "indoor"
+            ],
+            [
+                "in",
+                "door", [
+                    "get",
+                    "indoor"
+                ]
+
+            ]
+        ]
+    ],
+    "layout": {
+        "text-line-height": 1.2,
+        "icon-size": {
+            "base": 1,
+            "stops": [
+                [
+                    17,
+                    0.25
+                ],
+                [
+                    20,
+                    0.5
+                ]
+            ]
+        },
+        "text-size": {
+            "base": 1,
+            "stops": [
+                [
+                    17,
+                    11
+                ],
+                [
+                    20,
+                    13
+                ]
+            ]
+        },
+        "text-allow-overlap": false,
+        "icon-image": "door_64",
+        "icon-anchor": "center",
+        "text-ignore-placement": false,
+        "text-max-angle": 38,
+        "symbol-spacing": 250,
+        "text-font": [
+            "Open Sans Regular"
+        ],
+        "symbol-placement": "point",
+        "text-padding": 2,
+        "visibility": "visible",
+        "text-offset": [
+            0,
+            1
+        ],
+        "icon-optional": false,
+        "text-rotation-alignment": "viewport",
+        "icon-rotation-alignment": "map",
+        "text-anchor": "top",
+        "text-field": "{name}",
+        "text-letter-spacing": 0.02,
+        "text-max-width": 8,
+        "icon-allow-overlap": false
+    },
+    "paint": {
+        "text-color": "#65513d",
+        "text-halo-color": "#ffffff",
+        "text-halo-width": 1,
+        "text-opacity": {
+            "base": 1,
+            "stops": [
+                [
+                    15,
+                    0
+                ],
+                [
+                    16,
+                    0.5
+                ],
+                [
+                    19,
+                    1
+                ]
+            ]
+        },
+        "icon-opacity": {
+            "base": 1,
+            "stops": [
+                [
+                    15,
+                    0
+                ],
+                [
+                    16,
+                    0.5
+                ],
+                [
+                    19,
+                    1
+                ]
+            ]
+        }
+    }
+}, {
+    "id": "indoor-anchor-outline-line",
+    "type": "line",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "visibility": "none",
+    "filter": [
+        "all", [
+            "has",
+            "feature_type"
+        ],
+        [
+            "==", [
+                "get",
+                "feature_type"
+            ],
+            "anchor"
+        ]
+    ],
+    "paint": {
+        "line-opacity": 1,
+        "line-width": 4,
+        "line-color": [
+            "case", ["in", ["get", "amenity"],
+                ["literal", ["restaurant", "cafe", "fast_food", "bakery"]]
+            ],
+            "#fa8435", [
+                "match", ["%", ["id"], 4],
+                0, "#ea4234",
+                1, "#fabc05",
+                2, "#34a853",
+                "#4286f4"
+            ]
+        ]
+    }
+}, {
+    "id": "indoor-anchor-fill",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "visibility": "none",
+    "filter": [
+        "all", [
+            "has",
+            "feature_type"
+        ],
+        [
+            "==", [
+                "get",
+                "feature_type"
+            ],
+            "anchor"
+        ]
+    ],
+    "type": "fill",
+    "paint": {
+        "fill-opacity": 1,
+        "fill-color": "#000000",
+        "fill-outline-color": [
+            "case", ["in", ["get", "amenity"],
+                ["literal", ["restaurant", "cafe", "fast_food", "bakery"]]
+            ],
+            "#fa8435",
+            "#ffffff"
+        ]
+    }
+}, {
+    "id": "not-indoor-tag",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "type": "line",
+    "visibility": "none",
+    "filter": [
+        "any", [
+            "!", [
+                "has",
+                "feature_type"
+            ]
+        ],
+        [
+            "all", [
+                "has",
+                "feature_type"
+            ],
+            [
+                "!=", [
+                    "get",
+                    "feature_type"
+                ],
+                "anchor"
+            ]
+        ]
+    ],
+    "paint": {
+        "line-opacity": 1,
+        "line-color": "#FF0000",
+        "line-width": 1
+    }
+}, {
+    "id": "indoor-door-extrusion",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "visibility": "none",
+    "filter": ["any", [
+            "has",
+            "door"
+        ],
+        [
+            "all", [
+                "has",
+                "indoor"
+            ],
+            [
+                "in",
+                "door", [
+                    "get",
+                    "indoor"
+                ]
+
+            ]
+        ]
+    ],
+    "type": "fill-extrusion",
+    "paint": {
+        "fill-extrusion-opacity": 0.8,
+        "fill-extrusion-color": "#1f1f1f",
+        "fill-extrusion-height": 2
+    }
+}, {
+    "id": "wall-fixture-extrusion",
+    "type": "fill-extrusion",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "visibility": "none",
+    "filter": [
+        "all", [
+            "has",
+            "indoor"
+        ],
+        [
+            "has",
+            "feature_type"
+        ],
+        [
+            "==", [
+                "get",
+                "feature_type"
+            ],
+            "fixture"
+        ],
+        [
+            "any", [
+                "==", [
+                    "get",
+                    "indoor"
+                ],
+                "room"
+            ],
+            [
+                "==", [
+                    "get",
+                    "indoor"
+                ],
+                "wall"
+            ]
+
+        ],
+        ["any", [
+                "==", ["geometry-type"],
+                "Polygon"
+            ],
+            [
+                "==", ["geometry-type"],
+                "MultiPolygon"
+            ]
+        ]
+    ],
+    "paint": {
+        "fill-extrusion-opacity": 0.8,
+        "fill-extrusion-color": [
+            "case", [
+                "all", [
+                    "has",
+                    "room"
+                ],
+                [
+                    "==", [
+                        "get",
+                        "room"
+                    ], "stairs"
+                ]
+            ],
+            "#f0f0f0",
+            "#f0f0f0"
+        ],
+
+        "fill-extrusion-height": 2
+    }
+}, {
+    "id": "indoor-name-symbol",
+    "type": "symbol",
+    "visibility": "none",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "interactive": true,
+    "filter": [
+        "all", [
+            "has",
+            "name"
+        ],
+        [
+            "has",
+            "feature_type"
+        ],
+        [
+            "==", [
+                "get",
+                "feature_type"
+            ],
+            "anchor"
+        ],
+        ["!", ["has", "shop"]]
+    ],
+    "layout": {
+        "text-line-height": 1.2,
+        "icon-size": {
+            "base": 1,
+            "stops": [
+                [
+                    17,
+                    0.5
+                ],
+                [
+                    20,
+                    1
+                ]
+            ]
+        },
+        "text-size": {
+            "base": 1,
+            "stops": [
+                [
+                    17,
+                    22
+                ],
+                [
+                    20,
+                    26
+                ]
+            ]
+        },
+        "text-allow-overlap": false,
+        "icon-image": "",
+        "icon-anchor": "center",
+        "text-ignore-placement": false,
+        "text-max-angle": 38,
+        "symbol-spacing": 250,
+        "text-font": [
+            "Open Sans Regular"
+        ],
+        "symbol-placement": "point",
+        "text-padding": 2,
+        "visibility": "visible",
+        "text-offset": [
+            0, -1
+        ],
+        "icon-optional": false,
+        "text-rotation-alignment": "viewport",
+        "text-anchor": "center",
+        "text-field": "{name}",
+        "text-letter-spacing": 0.02,
+        "text-max-width": 8,
+        "icon-allow-overlap": false
+    },
+    "paint": {
+        "text-halo-color": "#ffffff",
+        "text-color": [
+            "case", [
+                "==", [
+                    "feature-state",
+                    "hover"
+                ],
+                null
+            ],
+            [
+                "case", ["in", ["get", "amenity"],
+                    ["literal", ["restaurant", "cafe", "fast_food", "bakery"]]
+                ],
+                "#fa8435", [
+                    "match", ["%", ["id"], 4],
+                    0, "#ea4234",
+                    1, "#fabc05",
+                    2, "#34a853",
+                    "#4286f4"
+                ]
+            ],
+            [
+                "boolean", [
+                    "feature-state",
+                    "hover"
+                ]
+            ],
+            "white", [
+                "case", ["in", ["get", "amenity"],
+                    ["literal", ["restaurant", "cafe", "fast_food", "bakery"]]
+                ],
+                "#fa8435", [
+                    "match", ["%", ["id"], 4],
+                    0, "#ea4234",
+                    1, "#fabc05",
+                    2, "#34a853",
+                    "#4286f4"
+                ]
+            ]
+        ],
+        "text-halo-width": 1,
+        "text-opacity": 1
+    }
+}, {
+    "id": "indoor-shop-symbol",
+    "type": "symbol",
+    "visibility": "none",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "interactive": true,
+    "filter": [
+        "all", [
+            "has", "name"
+        ],
+        [
+            "has", "feature_type"
+        ],
+        [
+            "==", [
+                "get", "feature_type"
+            ],
+            "anchor"
+        ],
+        ["has", "shop"]
+    ],
+    "layout": {
+        "text-line-height": 1.2,
+        "icon-size": {
+            "base": 1,
+            "stops": [
+                [
+                    15,
+                    0.3
+                ],
+                [
+                    24,
+                    1
+                ]
+            ]
+        },
+        "text-size": {
+            "base": 1,
+            "stops": [
+                [
+                    17,
+                    22
+                ],
+                [
+                    20,
+                    26
+                ]
+            ]
+        },
+        "text-allow-overlap": false,
+        "icon-image": "{shop}_64",
+        "icon-anchor": "center",
+        "text-ignore-placement": false,
+        "text-max-angle": 38,
+        "symbol-spacing": 250,
+        "text-font": [
+            "Open Sans Regular"
+        ],
+        "symbol-placement": "point",
+        "text-padding": 2,
+        "visibility": "visible",
+        "text-offset": [
+            0, -1
+        ],
+        "icon-optional": false,
+        "text-rotation-alignment": "viewport",
+        "text-anchor": "center",
+        "text-field": "{name}",
+        "text-letter-spacing": 0.02,
+        "text-max-width": 8,
+        "icon-allow-overlap": false
+    },
+    "paint": {
+        "text-halo-color": "#ffffff",
+        "text-color": [
+            "case", [
+                "==", [
+                    "feature-state",
+                    "hover"
+                ],
+                null
+            ],
+            "#feb347", [
+                "boolean", [
+                    "feature-state",
+                    "hover"
+                ]
+            ],
+            "white",
+            "#feb347"
+        ],
+        "text-halo-width": 1,
+        "text-opacity": 1
+    }
+}, {
+    "id": "indoor-amenity-symbol",
+    "type": "symbol",
+    "visibility": "none",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "interactive": true,
+    "filter": [
+        "all", [
+            "has", "name"
+        ],
+        [
+            "has", "amenity"
+        ],
+        [
+            "has", "feature_type"
+        ],
+        [
+            "==", [
+                "get", "feature_type"
+            ],
+            "anchor"
+        ],
+        ["!", ["has", "shop"]]
+    ],
+    "layout": {
+        "text-line-height": 1.2,
+        "icon-size": {
+            "base": 1,
+            "stops": [
+                [
+                    15,
+                    0.3
+                ],
+                [
+                    24,
+                    1
+                ]
+            ]
+        },
+        "text-size": {
+            "base": 1,
+            "stops": [
+                [
+                    17,
+                    22
+                ],
+                [
+                    20,
+                    26
+                ]
+            ]
+        },
+        "text-allow-overlap": false,
+        "icon-image": "{amenity}_64",
+        "icon-anchor": "center",
+        "text-ignore-placement": false,
+        "text-max-angle": 38,
+        "symbol-spacing": 250,
+        "text-font": [
+            "Open Sans Regular"
+        ],
+        "symbol-placement": "point",
+        "text-padding": 2,
+        "visibility": "visible",
+        "text-offset": [
+            0, -1
+        ],
+        "icon-optional": false,
+        "text-rotation-alignment": "viewport",
+        "text-anchor": "center",
+        "text-field": "{name}",
+        "text-letter-spacing": 0.02,
+        "text-max-width": 8,
+        "icon-allow-overlap": false
+    },
+    "paint": {
+        "text-halo-color": "#ffffff",
+        "text-color": [
+            "case", [
+                "==", [
+                    "feature-state",
+                    "hover"
+                ],
+                null
+            ],
+            "#feb347", [
+                "boolean", [
+                    "feature-state",
+                    "hover"
+                ]
+            ],
+            "white",
+            "#feb347"
+        ],
+        "text-halo-width": 1,
+        "text-opacity": 1
+    }
+}, {
+    "id": "toilets-anchor-symbol",
+    "type": "symbol",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "interactive": true,
+    "filter": [
+        "all", [
+            "has",
+            "feature_type"
+        ],
+        [
+            "==", [
+                "get",
+                "feature_type"
+            ],
+            "anchor"
+        ],
+        [
+            "any", [
+                "all", [
+                    "has",
+                    "amenity"
+                ],
+                [
+                    "in",
+                    "toilet", [
+                        "get",
+                        "amenity"
+                    ]
+
+                ]
+            ],
+            [
+                "all", [
+                    "has",
+                    "room"
+                ],
+                [
+                    "in",
+                    "toilet", [
+                        "get",
+                        "room"
+                    ]
+
+                ]
+            ],
+            [
+                "all", [
+                    "has",
+                    "toilets"
+                ],
+                [
+                    "!=", [
+                        "get",
+                        "toilets"
+                    ],
+                    "no"
+                ]
+            ],
+            [
+                "all", [
+                    "has",
+                    "toilet"
+                ],
+                [
+                    "!=", [
+                        "get",
+                        "toilet"
+                    ],
+                    "no"
+                ]
+            ]
+        ]
+    ],
+    "layout": {
+        "icon-size": {
+            "base": 1,
+            "stops": [
+                [
+                    15,
+                    0.3
+                ],
+                [
+                    24,
+                    1
+                ]
+            ]
+        },
+        "icon-image": "toilets_64",
+        "icon-anchor": "center",
+        "icon-offset": [0, -32],
+        "symbol-spacing": 250,
+        "symbol-placement": "point",
+        "visibility": "visible",
+        "icon-optional": false,
+        "icon-allow-overlap": false
+    }
+}, {
+    "id": "elevator-anchor-symbol",
+    "type": "symbol",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "interactive": true,
+    "filter": [
+        "all", [
+            "has",
+            "feature_type"
+        ],
+        [
+            "==", [
+                "get",
+                "feature_type"
+            ],
+            "anchor"
+        ],
+        [
+            "any", [
+                "all", [
+                    "has",
+                    "room"
+                ],
+                [
+                    "==",
+                    "elevator", [
+                        "get",
+                        "room"
+                    ]
+
+                ]
+            ],
+            [
+                "has",
+                "elevator"
+            ],
+            [
+                "all", [
+                    "has",
+                    "highway"
+                ],
+                [
+                    "==",
+                    "elevator", [
+                        "get",
+                        "highway"
+                    ]
+
+                ]
+            ]
+        ]
+    ],
+    "layout": {
+        "icon-size": {
+            "base": 1,
+            "stops": [
+                [
+                    15,
+                    0.3
+                ],
+                [
+                    24,
+                    1
+                ]
+            ]
+        },
+        "icon-image": "elevator_64",
+        "icon-anchor": "center",
+        "icon-offset": [0, -32],
+        "symbol-spacing": 250,
+        "symbol-placement": "point",
+        "visibility": "visible",
+        "icon-optional": false,
+        "icon-allow-overlap": false
+    }
+}, {
+    "id": "escalator-anchor-symbol",
+    "type": "symbol",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "interactive": true,
+    "filter": [
+        "all", [
+            "has",
+            "feature_type"
+        ],
+        [
+            "==", [
+                "get",
+                "feature_type"
+            ],
+            "anchor"
+        ],
+        [
+            "any", [
+                "all", [
+                    "has",
+                    "room"
+                ],
+                [
+                    "==",
+                    "escalator", [
+                        "get",
+                        "room"
+                    ]
+
+                ]
+            ],
+            [
+                "has",
+                "escalator"
+            ],
+            [
+                "has",
+                "conveying"
+            ]
+        ]
+    ],
+    "layout": {
+        "icon-size": {
+            "base": 1,
+            "stops": [
+                [
+                    15,
+                    0.3
+                ],
+                [
+                    24,
+                    1
+                ]
+            ]
+        },
+        "icon-image": "conveying_64",
+        "icon-anchor": "center",
+        "icon-offset": [0, -32],
+        "symbol-spacing": 250,
+        "symbol-placement": "point",
+        "visibility": "visible",
+        "icon-optional": false,
+        "icon-allow-overlap": false
+    }
+}, {
+    "id": "stairs-anchor-symbol",
+    "type": "symbol",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "interactive": true,
+    "filter": [
+        "all", [
+            "has",
+            "feature_type"
+        ],
+        [
+            "==", [
+                "get",
+                "feature_type"
+            ],
+            "anchor"
+        ],
+        [
+            "any", [
+                "all", [
+                    "has",
+                    "room"
+                ],
+                [
+                    "==",
+                    "stairs", [
+                        "get",
+                        "room"
+                    ]
+
+                ]
+            ],
+            [
+                "has",
+                "stairs"
+            ]
+        ]
+    ],
+    "layout": {
+        "icon-size": {
+            "base": 1,
+            "stops": [
+                [
+                    15,
+                    0.3
+                ],
+                [
+                    24,
+                    1
+                ]
+            ]
+        },
+        "icon-image": "stairs_64",
+        "icon-anchor": "center",
+        "icon-offset": [0, -32],
+        "symbol-spacing": 250,
+        "symbol-placement": "point",
+        "visibility": "visible",
+        "icon-optional": false,
+        "icon-allow-overlap": false
+    }
+}, {
+    "id": "shelf-barrier-fill",
+    "type": "fill-extrusion",
+    "source": "indoor_source",
+    "minzoom": 15,
+    "visibility": "none",
+    "filter": [
+        "all", [
+            "has",
+            "barrier"
+        ],
+        [
+            "==", [
+                "get",
+                "barrier"
+            ],
+            "shelf"
+        ]
+    ],
+    "paint": {
+        "fill-extrusion-opacity": 0.5,
+        "fill-extrusion-color": "#0077FF",
+        "fill-extrusion-height": 2
+    }
+}]

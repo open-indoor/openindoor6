@@ -1,3 +1,7 @@
+/**
+ * @jest-environment jsdom
+ */
+
 import centroid from '@turf/centroid';
 import buffer from '@turf/buffer';
 import booleanContains from '@turf/boolean-contains';
@@ -6,6 +10,38 @@ import intersect from '@turf/intersect';
 import clone from '@turf/clone';
 import lineToPolygon from '@turf/line-to-polygon'
 import polygonToLine from '@turf/polygon-to-line'
+import osmtogeojson from 'osmtogeojson/osmtogeojson.js';
+// import { JSDOM } from 'jsdom';
+
+// var isNode = false;
+// if (typeof process === 'object') {
+//     if (typeof process.versions === 'object') {
+//         if (typeof process.versions.node !== 'undefined') {
+//             isNode = true;
+//         }
+//     }
+// }
+
+// if (isNode) {
+//     console.log('NODE mode');
+//     // const window = (new JSDOM(``, { pretendToBeVisual: true })).window;
+//     // const crypto = await
+//     // import ('crypto');
+//     // const { DOMParser } = await
+//     // import ('@xmldom/xmldom');
+// } else {
+//     console.log('WEB mode');
+//     const crypto = window.crypto;
+// }
+
+
+// import crypto from 'crypto';
+
+// import { DOMParser } from '@xmldom/xmldom'
+// const jsdom = require("jsdom")
+// const { JSDOM } = jsdom
+// import { JSDOM } from 'jsdom';
+// global.DOMParser = new JSDOM().window.DOMParser
 
 class toolbox {
 
@@ -19,10 +55,14 @@ class toolbox {
     static lineOrPolygonize(geojson) {
         for (let feature of geojson.features) {
             if ((
-                    feature.geometry.type === 'LineString' ||
+                    feature.geometry.type === 'LineString' && feature.geometry.coordinates.length >= 4
+                ) && toolbox.poly_vs_line(feature.properties)) {
+                feature.geometry = lineToPolygon(feature, { mutate: true }).geometry;
+            } else if ((
                     feature.geometry.type === 'MultiLineString'
                 ) && toolbox.poly_vs_line(feature.properties)) {
-                feature.geometry = lineToPolygon(feature).geometry;
+                feature.geometry.coordinates = feature.geometry.coordinates.filter(coord_ => coord_.length >= 4);
+                feature.geometry = lineToPolygon(feature, { mutate: true }).geometry;
             } else if ((
                     feature.geometry.type === 'Polygon' ||
                     feature.geometry.type === 'MultiPolygon'
@@ -30,6 +70,79 @@ class toolbox {
                 feature.geometry = polygonToLine(feature).geometry;
             }
         }
+    }
+
+    // static parse(data, ext, building_id) {
+    static parse(data, ext) {
+        let geojson = null;
+        let floor = null;
+        let indoor = null;
+        if (ext === "geojson") {
+            geojson = JSON.parse(data);
+        } else if (ext === "osm") {
+            // console.log("OSM !!!")
+            // let parser = undefined;
+            // if (window === undefined) {
+            //     const { DOMParser } = await
+            //     import ('@xmldom/xmldom');
+            // }
+            let parser = new DOMParser();
+            let xml = parser.parseFromString(data, 'text/xml');
+            geojson = osmtogeojson(xml, { flatProperties: true });
+            // console.log("geojson:", JSON.stringify(geojson, null, 4));
+        }
+
+        geojson.features = geojson.features.filter(feat_ => (feat_.properties !== null))
+        if (geojson.features.filter(feat_ => isNaN(feat_.id)).length > 0) {
+            let i = 0;
+            for (let feat_ of geojson.features) {
+                // let polygons = polygonize(feat_)
+                i++;
+                feat_.id = i;
+                feat_.properties.osm_id = "x" + i;
+            }
+        }
+        toolbox.lineOrPolygonize(geojson);
+        let building = {
+            type: "FeatureCollection",
+            features: geojson.features.filter(feat_ => ('building' in feat_.properties))
+        }
+        console.log('building:', building);
+
+        geojson = {
+            type: "FeatureCollection",
+            features: geojson.features.filter(feat_ => (!('building' in feat_.properties)))
+        }
+        console.log('geojson:', geojson);
+
+        // if (building_id != null) {
+        //     console.log('building_id:', building_id);
+        //     let my_building = {
+        //         type: "FeatureCollection",
+        //         features: building.features.filter(
+        //             feat_ => (
+        //                 'building' in feat_.properties &&
+        //                 parseInt(feat_.properties.id) === parseInt(building_id)
+        //             )
+        //         )
+        //     }
+        //     console.log('my_building:', my_building);
+
+        //     // let lines = geojson.features.filter((feat_) => {
+        //     //     return feat_.geometry.type === 'LineString'
+        //     // });
+        //     // lines = lines.lineIntersect(lines, );
+        // }
+
+        toolbox.fix_indoor(geojson)
+
+        floor = clone(geojson);
+
+        indoor = geojson;
+
+        toolbox.openindoorize(geojson);
+
+        return [building, floor, indoor];
     }
 
     static poly_vs_line(properties) {
@@ -56,6 +169,11 @@ class toolbox {
         if (
             properties.highway === 'footway') {
             return false;
+        }
+        if (
+            properties.feature_type === 'section' &&
+            properties.category === 'exhibition') {
+            return true;
         }
         return false
     }
@@ -192,6 +310,8 @@ class toolbox {
 
     static openindoorize(geojson) {
 
+        // const crypto = await
+        // import ('crypto');
 
         // Add name point for indoor=room
         let anchors = [];
@@ -212,6 +332,8 @@ class toolbox {
             anchor.geometry = buffer(anchor, 0.1, { units: 'meters' }).geometry
 
             anchor.id = window.crypto.getRandomValues(new Uint32Array(1))[0];
+            // anchor.id = crypto.webcrypto.getRandomValues(new Uint32Array(1))[0];
+            // anchor.id = Math.floor(Math.random() * 2147483647);
             // anchor.properties = feature.properties;
             anchor.properties = JSON.parse(JSON.stringify(feature.properties))
 
@@ -254,6 +376,9 @@ class toolbox {
 
             let wall = buffer(feature, 0.1, { units: 'meters' });
             wall.id = window.crypto.getRandomValues(new Uint32Array(1))[0];
+            // wall.id = crypto.webcrypto.getRandomValues(new Uint32Array(1))[0];
+            // wall.id = Math.floor(Math.random() * 2147483647);
+
             wall.properties = JSON.parse(JSON.stringify(feature.properties));
             wall.properties.feature_type = "fixture";
             walls.push(wall);
@@ -356,6 +481,7 @@ class toolbox {
             }
         }
 
+
         for (let feature of geojson.features) {
             count++;
             if (!('properties' in feature))
@@ -385,15 +511,15 @@ class toolbox {
         geojson.features.push(...new_features)
 
         // min_level/max_level tag
-        for (let feature of geojson.features) {
+        geojson.features = geojson.features.filter((feature => {
             if (feature.properties === null)
                 feature.properties = {};
             if ('level' in feature.properties) {
                 let levels = toolbox.parseLevelsFloat(feature.properties.level);
                 // console.log('levels:', levels)
                 if (levels === null) {
-                    console.log('feature.properties.level:', feature.properties.level)
-                    continue
+                    console.error('Cannot parse feature.properties.level:', feature);
+                    return false;
                 }
                 feature.properties.min_level = levels[0];
                 feature.properties.max_level = levels[levels.length - 1];
@@ -401,7 +527,28 @@ class toolbox {
                 feature.properties.min_level = 0;
                 feature.properties.max_level = 0;
             }
-        }
+            return true;
+        }))
+
+        // for (let feature of geojson.features) {
+        //     if (feature.properties === null)
+        //         feature.properties = {};
+        //     if ('level' in feature.properties) {
+        //         let levels = toolbox.parseLevelsFloat(feature.properties.level);
+        //         // console.log('levels:', levels)
+        //         if (levels === null) {
+        //             console.error('Cannot parse feature.properties.level:', feature);
+        //             feature.properties.min_level = 0;
+        //             feature.properties.max_level = 0;
+        //             continue
+        //         }
+        //         feature.properties.min_level = levels[0];
+        //         feature.properties.max_level = levels[levels.length - 1];
+        //     } else {
+        //         feature.properties.min_level = 0;
+        //         feature.properties.max_level = 0;
+        //     }
+        // }
 
         // building level gap
         let building_min_level = 0
