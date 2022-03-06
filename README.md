@@ -102,6 +102,119 @@ Example index.html
 </html>
 ```
 
+## Explanations
+
+Here are openindoor() parameters:
+* center: GPS position for starting in the map
+* zoom: zoom when starting the app
+* layer: specific definition of indoor rendering. See https://maplibre.org/maplibre-gl-js-docs/style-spec/layers/
+* source: geojson input data
+* state: view mode. "indoor_state" means no building or floor view
+* bbox: area limitation. GPS center must be inside
+* modal: display modal window when clicking in a POI (Point Of Interest)
+* popup: display popup chen clicking in a POI
+* icon_tags:
+  * icon_url: field used to define the icon of a POI
+  * icon_name: field use as unique icon name
+* filter:
+  * layer_id: maplibre layer id to target to let text display only if no icon define
+  * rules: filter to apply to let text displayed
+
+# Use as a Progressive Web App
+
+Add this two files (and adapt them to your context):
+## manifest.json
+
+```js
+{
+    "name": "Kurv",
+    "short_name": "Kurv",
+    "icons": [{
+        "src": "images/openindoor-icon-128.png",
+        "sizes": "128x128",
+        "type": "image/png"
+    }, {
+        "src": "images/openindoor-icon-144.png",
+        "sizes": "144x144",
+        "type": "image/png"
+    }, {
+        "src": "images/openindoor-icon-152.png",
+        "sizes": "152x152",
+        "type": "image/png"
+    }, {
+        "src": "images/openindoor-icon-192.png",
+        "sizes": "192x192",
+        "type": "image/png"
+    }, {
+        "src": "images/openindoor-icon-256.png",
+        "sizes": "256x256",
+        "type": "image/png"
+    }, {
+        "src": "images/openindoor-icon-512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+    }],
+    "lang": "en-US",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "background_color": "white",
+    "theme_color": "white"
+}
+```
+
+## sw.js
+
+```js
+var cacheName = 'Kingconf';
+var filesToCache = [
+    '/',
+    '/index.html',
+    'https://unpkg.com/maplibre-gl@2.1.6/dist/maplibre-gl.js',
+    'https://unpkg.com/maplibre-gl@2.1.6/dist/maplibre-gl.css',
+    'https://app.openindoor.io/openindoor.js',
+    'https://kurv.openindoor.io/indoor-kurv.json',
+    'https://kurv.openindoor.io/kurv.geojson'
+];
+
+/* Start the service worker and cache all of the app's content */
+self.addEventListener('install', function(e) {
+    e.waitUntil(
+        caches.open(cacheName).then(function(cache) {
+            return cache.addAll(filesToCache);
+        })
+    );
+});
+
+/* Serve cached content when offline */
+self.addEventListener('fetch', function(e) {
+    e.respondWith(
+        caches.match(e.request).then(function(response) {
+            return response || fetch(e.request);
+        })
+    );
+});
+```
+## index.html header
+
+```html
+    <meta charset="utf-8" />
+    <title>Kurv</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="white" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="images/hello-icon-152.png">
+    <meta name="theme-color" content="white" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="kingconf">
+    <meta name="msapplication-TileImage" content="images/hello-icon-144.png">
+    <meta name="msapplication-TileColor" content="#FFFFFF">
+    <script src="https://unpkg.com/maplibre-gl@2.1.6/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@2.1.6/dist/maplibre-gl.css" rel="stylesheet" />
+
+    <script src="https://app.openindoor.io/openindoor.js"></script>
+```
 # Bookmarks
 
 * https://wiki.openstreetmap.org/wiki/Simple_Indoor_Tagging
