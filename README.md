@@ -37,14 +37,24 @@ See also bookmarks
 
 Example index.html
 
-```js
+```html
 <!DOCTYPE html>
 <html>
 
 <head>
     <meta charset="utf-8" />
-    <title>Display a map</title>
+    <title>Kurv</title>
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="white" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="images/hello-icon-152.png">
+    <meta name="theme-color" content="white" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="kingconf">
+    <meta name="msapplication-TileImage" content="images/hello-icon-144.png">
+    <meta name="msapplication-TileColor" content="#FFFFFF">
     <script src="https://unpkg.com/maplibre-gl@2.1.6/dist/maplibre-gl.js"></script>
     <link href="https://unpkg.com/maplibre-gl@2.1.6/dist/maplibre-gl.css" rel="stylesheet" />
 
@@ -53,6 +63,9 @@ Example index.html
         body {
             margin: 0;
             padding: 0;
+            display: flex;
+            height: 100%;
+            width: 100%;
         }
         
         #map {
@@ -194,7 +207,9 @@ self.addEventListener('fetch', function(e) {
     );
 });
 ```
-## index.html header
+## index.html
+
+### header
 
 ```html
     <meta charset="utf-8" />
@@ -214,6 +229,14 @@ self.addEventListener('fetch', function(e) {
     <link href="https://unpkg.com/maplibre-gl@2.1.6/dist/maplibre-gl.css" rel="stylesheet" />
 
     <script src="https://app.openindoor.io/openindoor.js"></script>
+```
+### body script
+```js
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for (let registration of registrations) {
+                registration.unregister()
+            }
+        })
 ```
 # Bookmarks
 
