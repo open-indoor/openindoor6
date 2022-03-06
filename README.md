@@ -35,9 +35,9 @@ See also bookmarks
 
 # Use as a library
 
-Example:
+Example index.html
 
-```
+```js
 <!DOCTYPE html>
 <html>
 
