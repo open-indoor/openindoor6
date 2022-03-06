@@ -65,6 +65,21 @@ class oid_routing {
                 color: "#34a853",
                 draggable: true
             });
+
+            var el = document.createElement('div');
+            el.className = 'start_marker';
+            el.style.backgroundImage =
+                'url(https://app-dev.openindoor.io/images/user_pinpoint.png)';
+            el.style.width = '24px';
+            el.style.height = '41px';
+
+            // add marker to map
+            this.start_marker = new maplibregl.Marker({
+                element: el,
+                draggable: true,
+                anchor: 'bottom'
+            });
+
             let self = this;
             // this.start_marker.on("dragend", () => self._on_start_dragend);
             this.start_marker.on("dragend", () => { self._on_start_dragend(self) });
@@ -81,10 +96,19 @@ class oid_routing {
     }
     _get_stop_marker() {
         if (this.stop_marker === undefined) {
+            var el = document.createElement('div');
+            el.className = 'start_marker';
+            el.style.backgroundImage =
+                'url(https://app-dev.openindoor.io/images/destination_pinpoint.png)';
+            el.style.width = '27px';
+            el.style.height = '41px';
+            // add marker to map
             this.stop_marker = new maplibregl.Marker({
-                color: "#ea4234",
-                draggable: true
+                element: el,
+                draggable: true,
+                anchor: 'bottom'
             });
+
             let self = this;
             this.stop_marker.on("dragend", () => { self._on_stop_dragend(self) });
 

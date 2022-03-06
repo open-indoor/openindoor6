@@ -123,14 +123,15 @@ class Abstractmachine {
 class machine extends Abstractmachine {
 
     static singleton = undefined;
-    static get_singleton(map, modal, popup, routing, info) {
+    static get_singleton(map, modal, popup, routing, info, feedback_control, info_control, mode_control, search_keys, search_filter) {
+
         if (machine.singleton === undefined)
-            machine.singleton = new machine(map, modal, popup, routing, info);
+            machine.singleton = new machine(map, modal, popup, routing, info, feedback_control, info_control, mode_control, search_keys, search_filter);
         return machine.singleton;
     }
     static indoor_layers = JSON.parse(JSON.stringify(default_indoor_layers))
 
-    constructor(map, modal, popup, routing, info) {
+    constructor(map, modal, popup, routing, info, feedback_control, info_control, mode_control, search_keys, search_filter) {
         super(map);
         this.modal = modal;
         this.popup = popup;
@@ -142,12 +143,23 @@ class machine extends Abstractmachine {
         this.init_mode = "building_state";
         this.layer = "default";
 
-        machine.controls = new Controls(map, machine);
+        machine.controls = new Controls(map, machine, feedback_control, info_control, mode_control, search_keys, search_filter);
         let self = this;
         // machine.controls.on_building_geocoder_result((e) => {
         //     console.log('building_geocoder_result !');
         //     self.setState(building_state);
         // })
+        machine.controls.set_on_geolocate_update((geolocate_e) => {
+            console.log('geolocate_e:', geolocate_e);
+
+            // let routing = machine.get_singleton().routing;
+
+            indoor_state.do_routing_start([
+                geolocate_e.coords.longitude,
+                geolocate_e.coords.latitude,
+            ]);
+        });
+
         machine.controls.set_on_indoor_button_pushed(() => {
             self.setState(indoor_state)
         });
@@ -175,7 +187,6 @@ class machine extends Abstractmachine {
             }
         });
 
-
         let dropZone = document.getElementById('map');
         dropZone.addEventListener('drop', (e) => this.handleGeojsonDropped(self, e), false);
         dropZone.addEventListener('dragover', (e) => {
@@ -189,7 +200,6 @@ class machine extends Abstractmachine {
         routing.set_stop_dragend(indoor_state.do_routing_stop);
     }
 
-
     static setLevel(level) {
         machine.controls.setLevel(level)
     }
@@ -197,10 +207,13 @@ class machine extends Abstractmachine {
         return machine.controls.getLevel()
     }
 
-
     // get_indoor_data() {
     //     return machine.indoor_data;
     // }
+
+    mark(features, lngLat) {
+        indoor_state.mark(indoor_state, features, lngLat);
+    }
 
     do() {
         this.state.do()
@@ -328,7 +341,9 @@ class machine extends Abstractmachine {
                     if (indoor_layers_ != null) {
                         for (let layer of machine.indoor_layers) {
                             // console.log('remove:', layer.id);
-                            machine.map.removeLayer(layer.id);
+                            if (machine.map.getLayer(layer.id) != null) {
+                                machine.map.removeLayer(layer.id);
+                            }
                         }
                         if (option.set_default) {
                             default_indoor_layers = indoor_layers_;
@@ -347,104 +362,32 @@ class machine extends Abstractmachine {
             }
         });
     }
-    parse(data, ext, building_id, level, feature_key, feature_id) {
+    parse(data, ext, options = {
+        icon_tags: {
+            icon_url: "icon-image",
+            icon_name: "icon-name",
+            filter: {
+                layer_id: "indoor-stand_name-symbol",
+                rules: ["!", [
+                    "has",
+                    "icon-name"
+                ]]
+            }
+        }
+    }) {
         console.log('going to parse !');
-        let [building_data, floor_data, indoor_data] = toolbox.parse(data, ext, building_id);
-
-
-
-
-        // let geojson;
-        // if (ext === "geojson") {
-        //     geojson = JSON.parse(data);
-
-        //     // console.log('-geojson:', geojson)
-        //     toolbox.lineOrPolygonize(geojson);
-        //     // for (let feature of geojson.features) {
-        //     //     if (
-        //     //         (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon') &&
-        //     //         !toolbox.poly_vs_line(feature.properties)
-        //     //     ) {
-        //     //         feature.geometry = polygonToLine(feature).geometry;
-        //     //     } else if (
-        //     //         (feature.geometry.type === 'LineString' || feature.geometry.type === 'MultiLineString') &&
-        //     //         toolbox.poly_vs_line(feature.properties)
-        //     //     ) {
-        //     //         if (feature.geometry.type === 'LineString') {
-        //     //             if (feature.geometry.coordinates.length >= 4) {
-        //     //                 // console.log('LineString feature.geometry.coordinates:', feature.geometry.coordinates);
-        //     //                 // polygons.add(feature.geometry.coordinates);
-        //     //                 feature.geometry = lineToPolygon(feature).geometry;
-        //     //             }
-        //     //         } else if (feature.geometry.type === 'MultiLineString') {
-        //     //             console.log('MultiLineString feature.geometry.coordinates:', feature.geometry.coordinates);
-        //     //             feature.geometry = lineToPolygon(feature).geometry;
-        //     //         }
-        //     //         // for (let polygon of polygons.filter(polygon.length >= 4)) {
-        //     //         // feature.geometry = lineToPolygon(feature).geometry;
-        //     //         // }
-        //     //     }
-        //     // }
-        // } else if (ext === "osm") {
-        //     // console.log('OSM not supported yet');
-        //     // let xml_text = "<osm></osm>";
-        //     // console.log('xml_text:', xml_text);
-        //     let parser = new DOMParser();
-        //     let xml = parser.parseFromString(data, 'text/xml');
-        //     // console.log('xml:', xml);
-        //     geojson = osmtogeojson(xml, { flatProperties: false });
-        //     console.log('geojson:', geojson);
-        //     // var sampleStr = text.slice(0, 100).toString();
-
-        //     // let parser = new DOMParser();
-        //     // let xmlDoc = parser.parseFromString(text, "text/xml");
-
-        //     // geojson = osmtogeojson(
-        //     //     xmlDoc, {
-        //     //         flatProperties: true,
-        //     //         polygonFeatures: function(properties) {
-        //     //             if (properties.indoor != null && properties.indoor === 'room' ||
-        //     //                 properties.building
-        //     //             )
-        //     //                 return false;
-        //     //             return false
-        //     //         }
-        //     //     }
-        //     // )
-        // }
+        let [building_data, floor_data, indoor_data] = toolbox.parse(
+            data,
+            ext
+        );
+        toolbox.loadImages(
+            machine.map,
+            indoor_data, {
+                icon_tags: options.icon_tags
+            }
+        );
 
         openIndoorMachine.data_mode = "drag_n_drop"
-
-        // geojson.features = geojson.features.filter(feat_ => (feat_.properties !== null))
-
-        // // Set ids and fix properties
-        // if (geojson.features.filter(feat_ => isNaN(feat_.id)).length > 0) {
-        //     let i = 0;
-        //     for (let feat_ of geojson.features) {
-        //         // let polygons = polygonize(feat_)
-        //         i++;
-        //         feat_.id = i;
-        //         feat_.properties.osm_id = "x" + i;
-        //     }
-        // }
-
-
-        // reset pins
-        // for (let layer of pins_layers) {
-        //     if (machine.map.getLayer(layer.id) === undefined)
-        //         continue;
-        //     machine.map.removeLayer(layer.id);
-        // }
-
-        // reset footprint source and layer
-
-        // let building_data = {
-        //     type: "FeatureCollection",
-        //     features: geojson.features.filter(feat_ => ('building' in feat_.properties))
-        // }
-        // console.log('building_data:', building_data)
-
-        // toolbox.fix_indoor(geojson)
 
         machine.floors_data = floor_data;
         machine.indoor_data = indoor_data;
@@ -493,7 +436,8 @@ class machine extends Abstractmachine {
             zoom: 16,
         });
         if (machine.get_singleton().init_mode === "indoor_state") {
-            indoor_state.set_feature(feature_key, feature_id);
+            if (options.feature_key != null && options.feature_id != null)
+                indoor_state.set_feature(options.feature_key, options.feature_id);
             openIndoorMachine.setState(indoor_state);
         } else {
             openIndoorMachine.setState(building_state);
@@ -578,6 +522,7 @@ class Building extends Abstractmachine {
         machine.map.off('pitch', floor_state.on_pitch_e);
 
         indoor_state.disable_display_info();
+        console.log('Reset routing');
         indoor_state.routing_reset();
 
         machine.map.setMaxPitch(60);
@@ -1389,6 +1334,7 @@ class Indoor extends Abstractmachine {
                     level_max: level + 1
                 });
                 // Remove routing markers
+                console.log('Remove routing markers');
                 self.routing_reset();
             }
         }
@@ -1418,7 +1364,8 @@ class Indoor extends Abstractmachine {
                     level_max
                 ]
             ].filter(filter => filter !== undefined)
-            machine.map.setFilter(layer.id, layer.filter)
+            if (machine.map.getLayer(layer.id) != null)
+                machine.map.setFilter(layer.id, layer.filter)
 
             // activate indoor layout
             // machine.map.setLayoutProperty("indoor-tag", "visibility", "visible")
@@ -1452,7 +1399,8 @@ class Indoor extends Abstractmachine {
 
         // Enable indoor layout
         for (let layer of machine.indoor_layers) {
-            machine.map.setLayoutProperty(layer.id, "visibility", "visible")
+            if (machine.map.getLayer(layer.id) != null)
+                machine.map.setLayoutProperty(layer.id, "visibility", "visible")
         }
 
         let level = machine.getLevel()
@@ -1462,12 +1410,15 @@ class Indoor extends Abstractmachine {
         })
 
         // deactivate shape layout
-        machine.map.setLayoutProperty("shape-area-extrusion-indoor-00", 'visibility', 'none')
-
+        if (machine.map.getLayer("shape-area-extrusion-indoor-00") != null) {
+            machine.map.setLayoutProperty("shape-area-extrusion-indoor-00", 'visibility', 'none')
+        }
 
         // deactivate building footprint layout
         machine.map.setLayoutProperty("building-footprint", 'visibility', 'none')
-        machine.map.setLayoutProperty("pins-layer", 'visibility', 'none')
+        if (machine.map.getLayer("pins-layer") != null) {
+            machine.map.setLayoutProperty("pins-layer", 'visibility', 'none')
+        }
 
         let flyend = function(e) {
             if (!Indoor.flying)
@@ -1499,6 +1450,9 @@ class Indoor extends Abstractmachine {
                 feat_.properties[self.feature_key] === self.feature_id_init
             );
             console.log('my_feature:', my_feature);
+            if (my_feature == null) {
+                return
+            }
             let feature_id = self.feature_id_init;
             let my_centroid = centroid(my_feature).geometry.coordinates;
             self.mark(
@@ -1627,7 +1581,7 @@ spinner.addEventListener('click', function() {
 
 let spinner_marker = new maplibregl.Marker(spinner)
 
-function openindoor_machine(map, modal, popup, routing, info) {
+function openindoor_machine(map, modal, popup, routing, info, feedback_control, info_control, mode_control, search_keys, search_filter) {
     console.log('machine.indoor_layers:', machine.indoor_layers)
     machine.map = map
     spinner_marker
@@ -1639,7 +1593,7 @@ function openindoor_machine(map, modal, popup, routing, info) {
     floor_state = new Floor(map);
     indoor_state = new Indoor(map);
 
-    openIndoorMachine = machine.get_singleton(map, modal, popup, routing, info);
+    openIndoorMachine = machine.get_singleton(map, modal, popup, routing, info, feedback_control, info_control, mode_control, search_keys, search_filter);
 
     openIndoorMachine.do();
     return openIndoorMachine;

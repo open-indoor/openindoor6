@@ -7,7 +7,6 @@ import building_layers from './layers/building.json';
 
 import addMapDOM from "./addMapDOM"
 import mapstyle from "./mapstyle"
-// import pinsStyle from "./pinsStyle"
 import urlparser from "./urlparser"
 import load_data from "./load_data"
 import openindoor_machine from "./openindoor_machine"
@@ -27,9 +26,21 @@ export default class openindoor {
         building_id: undefined,
         level: undefined,
         feature_key: "id",
-        // search_keys: "name",
+        search_keys: ["name", "ref"],
+        search_filter: {
+            properties: {
+                feature_type: ["anchor"]
+            }
+        },
         modal: false,
-        popup: true
+        popup: true,
+        feedback_control: "visible",
+        info_control: "visible",
+        mode_control: "visible",
+        icon_tags: {
+            icon_url: "image",
+            icon_name: "icon"
+        }
     }) {
 
         addMapDOM();
@@ -50,7 +61,10 @@ export default class openindoor {
             'state': options.state,
             'info': undefined,
             'zoom': options.zoom,
-            'style': mapstyle(),
+            'style': mapstyle({
+                source: options.source,
+                layer: options.layer
+            }),
             'maxBounds': options.bbox,
             'hash': true
         });
@@ -60,8 +74,18 @@ export default class openindoor {
 
             this.layer = options.layer;
             let routing = oid_routing.get_instance(map);
-            // pinsStyle(map)
-            let statemachine = openindoor_machine(map, modal, popup, routing, options.info);
+            let statemachine = openindoor_machine(
+                map,
+                modal,
+                popup,
+                routing,
+                options.info,
+                options.feedback_control,
+                options.info_control,
+                options.mode_control,
+                options.search_keys,
+                options.search_filter
+            );
             console.log('options.feature_key:', options.feature_key);
             console.log('options.feature_id:', options.feature_id);
             let load_my_data = load_data(
@@ -73,7 +97,8 @@ export default class openindoor {
                 options.building_id,
                 options.level,
                 options.feature_key,
-                options.feature_id
+                options.feature_id,
+                options.icon_tags
             );
             // let my_geojson = urlparser(map, statemachine, { layer: this.layer });
         });

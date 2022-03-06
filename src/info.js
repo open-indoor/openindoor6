@@ -20,8 +20,8 @@ class Info {
                 link = desc[key];
             }
             if (key === 'image' && Info.includes(key)) {
-                image = desc[image];
-                // image_desc = '<img width=200 src="'"></img>';
+                let image = desc[key];
+                image_desc = '<img src="' + image + '"></img>';
             }
         }
         if (link != null) {

@@ -7,7 +7,8 @@ function load_data(
     building_id,
     level,
     feature_key,
-    feature_id
+    feature_id,
+    icon_tags
 ) {
     if (layer != null) {
         if (["fair", "office", "station"].includes(layer)) {
@@ -35,11 +36,13 @@ function load_data(
             console.log('my_building_id:', building_id);
             statemachine.parse(
                 JSON.stringify(json),
-                "geojson",
-                building_id,
-                level,
-                feature_key,
-                feature_id
+                "geojson", {
+                    building_id: building_id,
+                    level: level,
+                    feature_key: feature_key,
+                    feature_id: feature_id,
+                    icon_tags: icon_tags
+                }
             );
             // statemachine.setFloorState();
         }).catch(error => {

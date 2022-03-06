@@ -72,7 +72,6 @@ class toolbox {
         }
     }
 
-    // static parse(data, ext, building_id) {
     static parse(data, ext) {
         let geojson = null;
         let floor = null;
@@ -107,32 +106,11 @@ class toolbox {
             type: "FeatureCollection",
             features: geojson.features.filter(feat_ => ('building' in feat_.properties))
         }
-        console.log('building:', building);
 
         geojson = {
             type: "FeatureCollection",
             features: geojson.features.filter(feat_ => (!('building' in feat_.properties)))
         }
-        console.log('geojson:', geojson);
-
-        // if (building_id != null) {
-        //     console.log('building_id:', building_id);
-        //     let my_building = {
-        //         type: "FeatureCollection",
-        //         features: building.features.filter(
-        //             feat_ => (
-        //                 'building' in feat_.properties &&
-        //                 parseInt(feat_.properties.id) === parseInt(building_id)
-        //             )
-        //         )
-        //     }
-        //     console.log('my_building:', my_building);
-
-        //     // let lines = geojson.features.filter((feat_) => {
-        //     //     return feat_.geometry.type === 'LineString'
-        //     // });
-        //     // lines = lines.lineIntersect(lines, );
-        // }
 
         toolbox.fix_indoor(geojson)
 
@@ -401,8 +379,9 @@ class toolbox {
                 (feat_) => {
                     if (feat_.properties != null &&
                         feat_.properties.indoor === 'room' && (
-                            feat_.geometry.type === 'Polygon' ||
-                            feat_.geometry.type === 'MultiPolygon'
+                            feat_.geometry.type === 'Polygon'
+                            // ||
+                            // feat_.geometry.type === 'MultiPolygon'
                         )
                     ) {
                         return true;
@@ -455,6 +434,91 @@ class toolbox {
         geojson.features.push(...new_doors);
     }
 
+    static loadImages(
+        map,
+        indoor_data,
+        options = {
+            icon_tags: {
+                icon_url: 'image',
+                icon_name: 'icon'
+            }
+        }) {
+        let icon_tags_ = options.icon_tags;
+        console.log('icon_tags_:', icon_tags_);
+        if (map.getLayer('indoor-stand_icon-symbol') == null)
+            map.addLayer({
+                'id': 'indoor-stand_icon-symbol',
+                'type': 'symbol',
+                'source': 'indoor_source',
+                "minzoom": 20,
+                "interactive": true,
+                "filter": [
+                    "all", [
+                        "has",
+                        icon_tags_.icon_name
+                    ],
+                    [
+                        "has",
+                        icon_tags_.icon_url
+                    ]
+                ],
+                "layout": {
+                    "icon-size": {
+                        "base": 1,
+                        "stops": [
+                            [
+                                15,
+                                0.3
+                            ],
+                            [
+                                24,
+                                1
+                            ]
+                        ]
+                    },
+                    "icon-image": "{" + icon_tags_.icon_name + "}",
+                    "icon-anchor": "center",
+                    "icon-offset": [0, 0],
+                    "symbol-spacing": 250,
+                    "symbol-placement": "point",
+                    "visibility": "visible",
+                    "icon-optional": false,
+                    "icon-allow-overlap": false
+                }
+            });
+        for (let feature of indoor_data.features) {
+            if (feature.properties == null)
+                continue;
+            if (feature.properties[icon_tags_.icon_url] == null ||
+                feature.properties[icon_tags_.icon_name] == null)
+                continue;
+            map.loadImage(
+                feature.properties[icon_tags_.icon_url],
+                function(err, image) {
+                    // Throw an error if something went wrong
+                    if (err) throw err;
+
+                    // Declare the image
+                    console.log('add image', feature.properties[icon_tags_.icon_name], ':', feature.properties[icon_tags_.icon_url])
+                    map.addImage(feature.properties[icon_tags_.icon_name], image);
+                    if (icon_tags_.filter != null) {
+                        let layer = map.getLayer(icon_tags_.filter.layer_id);
+                        if (layer != null) {
+                            map.setFilter(
+                                layer.id, [
+                                    "all",
+                                    layer.filter,
+                                    icon_tags_.filter.rules
+                                ]
+                            );
+                            let filter = map.getFilter(layer.id);
+                            console.log('filter:', filter);
+                        }
+                    }
+                }
+            );
+        }
+    }
     static fix_indoor(geojson) {
         // repeat_on tag
         // console.log('size:', geojson.features.length)

@@ -1,6 +1,7 @@
 import MaplibreGeocoder from '@maplibre/maplibre-gl-geocoder';
 import '@maplibre/maplibre-gl-geocoder/dist/maplibre-gl-geocoder.css';
 import center from '@turf/center';
+import centroid from '@turf/centroid';
 
 
 // https://github.com/opening-hours/opening_hours.js/blob/master/examples/simple_index.html
@@ -247,12 +248,12 @@ class LevelControl {
             // }
             if (!(index < self._levels.length - 1))
                 return
-            self.change_level_action({ level: self._level_number }).before()
+            self.change_level_action({ level: self._level_number }).before();
 
             self._level_number = self._levels[index + 1];
             // console.log('index:', index)
             self._level.textContent = self._level_number;
-            self.change_level_action({ level: self._level_number }).after()
+            self.change_level_action({ level: self._level_number }).after();
 
             if (index + 1 === self._levels.length - 1) {
                 // TODO: unactivate level down button
@@ -493,48 +494,65 @@ class Controls {
     //     machine.setState(building)
     // })
     set_on_building_button_pushed(e) {
-        this.building_control.set_on_button_pushed(e)
-
+        if (this.building_control != null) {
+            this.building_control.set_on_button_pushed(e)
+        }
     }
     set_on_indoor_button_pushed(e) {
-        this.indoor_control.set_on_button_pushed(e)
-
+        if (this.indoor_control != null) {
+            this.indoor_control.set_on_button_pushed(e)
+        }
     }
     set_on_floor_button_pushed(e) {
-        this.floor_control.set_on_button_pushed(e)
-
+        if (this.floor_control != null) {
+            this.floor_control.set_on_button_pushed(e)
+        }
     }
 
     enable_building_button() {
-        this.building_control.enable()
+        if (this.building_control != null) {
+            this.building_control.enable()
+        }
     }
 
     disable_building_button() {
-        this.building_control.disable()
+        if (this.building_control != null) {
+            this.building_control.disable()
+        }
     }
 
 
     enable_floor_button() {
-        this.floor_control.enable()
+        if (this.floor_control != null) {
+            this.floor_control.enable()
+        }
     }
 
     disable_floor_button() {
-        this.floor_control.disable()
+        if (this.floor_control != null) {
+            this.floor_control.disable()
+        }
     }
 
 
     enable_indoor_button() {
-        this.indoor_control.enable()
+        if (this.indoor_control != null) {
+            this.indoor_control.enable()
+        }
     }
 
     disable_indoor_button() {
-        this.indoor_control.disable()
+        if (this.indoor_control != null) {
+            this.indoor_control.disable()
+        }
     }
 
     switch_to_building_geocoder() {
         console.log("switch to building geocoder");
         this.geocoder.setGeocoderApi(this.building_geocoder_api);
         this.geocoder.setZoom(17);
+        this.geocoder.options.showResultsWhileTyping = false;
+        this.geocoder.options.debounceSearch = 200;
         this.geocoder.setPlaceholder("Outdoor search");
         // this.geocoder.setInput("");
     }
@@ -543,6 +561,8 @@ class Controls {
         console.log("switch to indoor geocoder");
         this.geocoder.setGeocoderApi(this.indoor_geocoder_api);
         this.geocoder.setZoom(20);
+        this.geocoder.options.showResultsWhileTyping = true;
+        this.geocoder.options.debounceSearch = 10;
         this.geocoder.setPlaceholder("Indoor search");
         // this.geocoder.setInput("");
     }
@@ -578,6 +598,14 @@ class Controls {
 
     }
 
+    set_on_geolocate_update(geolocate_fn) {
+        this.geolocate.on('geolocate', geolocate_fn);
+    }
+
+    set_on_geolocate_trackuserlocationstart(trackuserlocationstart_fn) {
+        this.geolocate.on('trackuserlocationstart', trackuserlocationstart_fn);
+    }
+
     set_indoor_level_action(indoor_level_action) {
         this.levelControl.set_indoor_level_action(indoor_level_action)
     }
@@ -594,17 +622,29 @@ class Controls {
         this.levelControl.setLevels(levels)
     }
 
-    constructor(map, machine) {
+    constructor(map, machine, feedback_control, info_control, mode_control, search_keys, search_filter) {
 
         // this.building_geocoder_enabled = false;
         this.map = map
             // this.machine = machine;
-        this.building_control = new BuildingControl();
-        this.floor_control = new FloorControl();
-        this.indoor_control = new IndoorControl();
-        this.info_control = new InfoControl();
+
+        if (mode_control === "visible") {
+            this.building_control = new BuildingControl();
+            this.floor_control = new FloorControl();
+            this.indoor_control = new IndoorControl();
+            map.addControl(this.building_control, "top-left");
+            map.addControl(this.floor_control, "top-left");
+            map.addControl(this.indoor_control, "top-left");
+        }
+
+        if (info_control === "visible") {
+            this.info_control = new InfoControl();
+            map.addControl(this.info_control, "bottom-right");
+        }
 
         let self = this;
+        this.search_keys = search_keys;
+        this.search_filter = search_filter;
 
         this.building_geocoder_api = {
             forwardGeocode: async(config) => {
@@ -643,8 +683,9 @@ class Controls {
 
         this.geocoder = new MaplibreGeocoder(
             this.building_geocoder_api, {
+                zoom: 20,
                 flyTo: true,
-                clearAndBlurOnEsc: true,
+                clearAndBlurOnEsc: false,
                 clearOnBlur: true,
                 placeholder: "Outdoor search",
                 maplibregl: maplibregl
@@ -660,12 +701,48 @@ class Controls {
             forwardGeocode: async(config) => {
                 const features = [];
                 console.log("data:", machine.indoor_data);
-                for (let feature of machine.indoor_data.features) {
-                    if (feature.properties == null || feature.properties.name == null || feature.properties.feature_type !== "anchor")
+
+                let features_filtered = machine.indoor_data.features.filter(
+                    (feat_) => {
+                        if (self.search_filter.properties != null) {
+                            for (let prop_key in self.search_filter.properties) {
+                                if (!(prop_key in feat_.properties)) {
+                                    return false;
+                                }
+                                if (feat_.properties[prop_key] != self.search_filter.properties[prop_key] &&
+                                    !(feat_.properties[prop_key] in self.search_filter.properties[prop_key])) {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        }
+                    }
+                );
+
+                for (let feature of features_filtered) {
+                    if (feature.properties == null)
                         continue;
-                    // console.log('feature:', feature);
-                    // console.log('config.query:', config.query);
-                    if (feature.properties.name.toLowerCase().includes(config.query.toLowerCase())) {
+                    if (self.search_filter != null) {
+
+                        if (self.search_filter.properties != null) {
+                            for (let prop_key in self.search_filter.properties) {
+                                if (prop_key in feature.properties) {
+
+                                }
+                            }
+                        }
+                    }
+
+                    let place_name = undefined;
+                    for (let search_key of self.search_keys) {
+                        if (feature.properties[search_key] != null && feature.properties[search_key].toLowerCase().includes(config.query.toLowerCase())) {
+                            place_name = feature.properties[search_key];
+                        }
+                    }
+                    if (place_name != null)
+                    // if (feature.properties.name.toLowerCase().includes(config.query.toLowerCase())) 
+                    {
+                        console.log('feature.properties:', feature.properties);
                         let center_ = center(feature).geometry.coordinates;
                         let point = {
                             type: "Feature",
@@ -674,9 +751,9 @@ class Controls {
                                 coordinates: center_
                             },
                             // place_name: feature.properties.min_level + ' - ' + feature.properties.name,
-                            place_name: feature.properties.name,
+                            place_name: place_name,
                             properties: feature.properties,
-                            text: feature.properties.name,
+                            text: place_name,
                             place_type: ["place"],
                             center: center_
                         }
@@ -692,17 +769,31 @@ class Controls {
         };
 
         this.geocoder.on('result', (e) => {
+            console.log('geocoder result:', e);
             // Go to indoor view
             if (!machine.get_singleton().is_building_state()) {
                 machine.get_singleton().set_indoor_state();
             }
-            console.log('geocoder result:', e);
+
             let feature = e.result;
-            if (feature.properties != null && feature.properties.min_level != null) {
+            // Update way-finding
+            let my_centroid = centroid(feature).geometry.coordinates;
+            machine.get_singleton().mark(
+                [feature], {
+                    lng: my_centroid[0],
+                    lat: my_centroid[1],
+                }
+            );
+
+            if (feature.properties != null &&
+                feature.properties.min_level != null &&
+                parseInt(feature.properties.min_level) != self.levelControl._level_number) {
                 self.levelControl.change_level_action({ level: parseInt(feature.properties.min_level) }).after();
                 self.levelControl._level_number = parseInt(feature.properties.min_level);
                 // console.log('index:', index)
-                self.levelControl._level.textContent = feature.properties.min_level;
+                if (feature.properties._level != null) {
+                    self.levelControl._level.textContent = feature.properties.min_level;
+                }
             }
         })
 
@@ -710,10 +801,6 @@ class Controls {
         // this.disable_indoor_geocoder();
         map.addControl(this.geocoder, "top-right");
 
-        map.addControl(this.building_control, "top-left");
-        map.addControl(this.floor_control, "top-left");
-        map.addControl(this.indoor_control, "top-left");
-        map.addControl(this.info_control, "bottom-right");
 
         this.levelControl = new LevelControl({
             minpitchzoom: 11,
@@ -721,15 +808,18 @@ class Controls {
 
         // map.addControl(new PitchToggle({ minpitchzoom: 11 }), "top-left");
 
-        map.addControl(new maplibregl.GeolocateControl({
+        this.geolocate = new maplibregl.GeolocateControl({
             positionOptions: {
                 enableHighAccuracy: true
             },
             trackUserLocation: true
-        }));
+        });
+        map.addControl(this.geolocate);
 
-        this.feedbackControl = new FeedbackControl({})
-        map.addControl(this.feedbackControl, "bottom-left");
+        if (feedback_control === "visible") {
+            this.feedbackControl = new FeedbackControl({})
+            map.addControl(this.feedbackControl, "bottom-left");
+        }
 
         var scale = new maplibregl.ScaleControl({
             maxWidth: 80,

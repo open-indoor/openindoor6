@@ -5,23 +5,64 @@ import pins_layers from './layers/pins.json';
 import shape_layers from './layers/shape.json';
 import indoor_layers from './layers/indoor.json';
 
-function mapstyle() {
-    return {
-        "version": 8,
-        "transition": {
-            "duration": 300,
-            "delay": 0
+function mapstyle(options = {
+    source: undefined,
+    layer: undefined
+}) {
+    let sources = {
+        "raster-tiles": {
+            "type": "raster",
+            "tiles": [
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+            ],
+            "tileSize": 256,
+            "minzoom": 0,
+            "maxzoom": 19
         },
-        "name": "Blank",
-        "center": [0, 0],
-        "zoom": 0,
-        "light": {
-            "anchor": "map",
-            "color": "white",
-            "intensity": 0.4,
-            "position": [1.15, 210, 30]
+        "footprint": {
+            "type": "vector",
+            "tiles": [
+                "https://tegola.openindoor.io/maps/openindoor/footprint/{z}/{x}/{y}.vector.pbf?token=kjGxKVMZcXAao1mtOOALxWY3",
+            ],
+            // "promoteId": "osm_id",
+            "minzoom": 12,
+            "maxzoom": 20,
+            "attribution": "OpenIndoor / OpenStreetMap / Maplibre"
         },
-        "sources": {
+        "pins": {
+            "type": "vector",
+            "tiles": [
+                "https://tegola.openindoor.io/maps/openindoor/pins/{z}/{x}/{y}.vector.pbf?token=kjGxKVMZcXAao1mtOOALxWY3"
+            ],
+            "minzoom": 0,
+            "maxzoom": 20
+        },
+        "shape_source": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": []
+            },
+            "generateId": true,
+        },
+        "indoor_source": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": []
+            },
+            "generateId": true,
+        },
+        "selection": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": []
+            }
+        },
+    };
+    if (options.source != null) {
+        sources = {
             "raster-tiles": {
                 "type": "raster",
                 "tiles": [
@@ -32,22 +73,20 @@ function mapstyle() {
                 "maxzoom": 19
             },
             "footprint": {
-                "type": "vector",
-                "tiles": [
-                    "https://tegola.openindoor.io/maps/openindoor/footprint/{z}/{x}/{y}.vector.pbf?token=kjGxKVMZcXAao1mtOOALxWY3",
-                ],
-                // "promoteId": "osm_id",
-                "minzoom": 12,
-                "maxzoom": 20,
-                "attribution": "OpenIndoor / OpenStreetMap / Maplibre"
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": []
+                },
+                "generateId": true,
             },
             "pins": {
-                "type": "vector",
-                "tiles": [
-                    "https://tegola.openindoor.io/maps/openindoor/pins/{z}/{x}/{y}.vector.pbf?token=kjGxKVMZcXAao1mtOOALxWY3"
-                ],
-                "minzoom": 0,
-                "maxzoom": 20
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": []
+                },
+                "generateId": true,
             },
             "shape_source": {
                 "type": "geojson",
@@ -72,19 +111,44 @@ function mapstyle() {
                     "features": []
                 }
             },
-        },
-        "sprite": "https://open-indoor.github.io/sprite_2/sprite",
-        "glyphs": "https://open-indoor.github.io/fonts/{fontstack}/{range}.pbf",
-        "layers": [
+        }
+    }
+    let layers = [
+        ...background_layers,
+        ...raster_layers,
+        ...footprint_layers,
+        ...pins_layers,
+        ...shape_layers,
+        ...indoor_layers,
+    ];
+    if (options.layer != null) {
+        layers = [
             ...background_layers,
             ...raster_layers,
-            ...footprint_layers,
             ...pins_layers,
-            // ...building_layers,
             ...shape_layers,
-            // ...shape_flat_layers,
-            ...indoor_layers,
-        ],
+        ]
+    }
+
+    return {
+        "version": 8,
+        "transition": {
+            "duration": 300,
+            "delay": 0
+        },
+        "name": "Blank",
+        "center": [0, 0],
+        "zoom": 0,
+        "light": {
+            "anchor": "map",
+            "color": "white",
+            "intensity": 0.4,
+            "position": [1.15, 210, 30]
+        },
+        "sources": sources,
+        "sprite": "https://open-indoor.github.io/sprite_2/sprite",
+        "glyphs": "https://open-indoor.github.io/fonts/{fontstack}/{range}.pbf",
+        "layers": layers,
         "id": "blank"
     }
 }
