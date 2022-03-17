@@ -5,38 +5,110 @@ class Info {
         return (Info.data == null) || (Info.data.includes(key))
     }
 
+    /* description : 
+    <div>
+    <img width=128 style="vertical-align:middle" src="https://upload.wikimedia.org/wikipedia/commons/a/a1/Missing_image_icon_with_camera_and_upload_arrow.svg">
+    <h1>Lycée J.Delanoue + IFAS</h1>
+    </div>
+    <hr>
+    (description)
+    
+    name (title)
+    image (url's image)
+    url (link for external website)
+    desc (description text)*/
+
+    // static get_description_data(feature, coord) {
+    //     let desc = feature.properties;
+    //     let description = '';
+    //     let title = undefined;
+    //     let link = undefined;
+    //     let image = undefined;
+    //     let image_desc = '<img width=128 style ="vertical-align:middle" src="https://upload.wikimedia.org/wikipedia/commons/a/a1/Missing_image_icon_with_camera_and_upload_arrow.svg"></img>'
+    //     for (let key of Object.keys(desc)) {
+    //         if (key === 'name' && Info.includes(key)) {
+    //             title = desc[key];
+    //         }
+    //         if (key === 'ref' && Info.includes(key)) {
+    //             let ref = desc[key];
+    //         }
+    //         if (key === 'url' && Info.includes(key)) {
+    //             link = desc[key];
+    //         }
+    //         if (key === 'image' && Info.includes(key)) {
+    //             let image = desc[key];
+    //             image_desc = '<img width=128 style="vertical-align:middle" src="' + image + '">';
+    //         }
+    //         if (key === 'desc' && Info.includes(key)) {
+    //             description = '<br>' + desc[key];
+    //         }
+
+    //     }
+    //     if (link != null) {
+    //         image_desc = '<a target="_blank" href="' + link + '">' + image_desc + '</a>';
+    //     }
+    //     // description = image_desc + description;
+    //     if (title != null) {
+    //         //let _title = '<h1>' + title + '</h1>';
+    //         let _title = '<span style="font-size: 28px; font-family:Open Sans Regular;">' + title + "</span>";
+    //         if (link != null) {
+    //             _title = '<a target="_blank" href="' + link + '">' + _title + '</a>';
+    //         }
+    //         _title = "<div>" + image_desc + _title + "</div>";
+    //         _title += '<hr>';
+    //         description = _title + description;
+    //     }
+    //     console.log("description:", description)
+    //     return description;
+    // }
+
     static get_description_data(feature, coord) {
         let desc = feature.properties;
         let description = '';
         let title = undefined;
         let link = undefined;
         let image = undefined;
-        let image_desc = '<img width=200 src="https://upload.wikimedia.org/wikipedia/commons/a/a1/Missing_image_icon_with_camera_and_upload_arrow.svg"></img>'
+        let ref = undefined;
+        let image_desc = '<img width=128 style="float: left;" src="https://upload.wikimedia.org/wikipedia/commons/a/a1/Missing_image_icon_with_camera_and_upload_arrow.svg"></img>'
         for (let key of Object.keys(desc)) {
             if (key === 'name' && Info.includes(key)) {
                 title = desc[key];
+            }
+            if (key === 'ref' && Info.includes(key)) {
+                ref = desc[key];
             }
             if (key === 'url' && Info.includes(key)) {
                 link = desc[key];
             }
             if (key === 'image' && Info.includes(key)) {
                 let image = desc[key];
-                image_desc = '<img src="' + image + '"></img>';
+                image_desc = 'img width=128 style="float: left;" src="' + image + '">';
             }
+            if (key === 'desc' && Info.includes(key)) {
+                description = '<br>' + desc[key];
+            }
+
         }
         if (link != null) {
             image_desc = '<a target="_blank" href="' + link + '">' + image_desc + '</a>';
         }
-        description = image_desc + description;
+        // description = image_desc + description;
         if (title != null) {
-            let _title = '<div style="text-align:center"><h1>' + title + '</h1></div>';
+            //let _title = '<h1>' + title + '</h1>';
+            let _title = '<div style="font-size: 22px; font-family:Arial; position:relative; top: 25px; left: 10px;">' + title + "<br></div>";
             if (link != null) {
                 _title = '<a target="_blank" href="' + link + '">' + _title + '</a>';
             }
-            _title += '<hr>';
-            description = _title + description;
-        }
-
+            _title = image_desc + _title;
+            console.log("ref :", ref);
+            if (ref != null) {
+                ref = ' <div style="font-size: 19px; font-family: Arial; position: relative;top: 35px; left: 10px;">' + ref + "</div> <br><br> <a href='#' class='Go_to_button'>Go to</a>"
+                _title += ref;
+            }
+            _title += '<br><br><br> <hr style="position: relative; bottom: 25px;">';
+            description = _title + '<span style = "font-family: Arial ">' + description + '</span>';
+        } //Open Sans Regular
+        console.log("description:", description)
         return description;
     }
 

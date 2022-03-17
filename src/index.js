@@ -20,6 +20,8 @@ export default class openindoor {
         container: 'map',
         center: [-1.70188, 48.11915],
         zoom: 17,
+        pitch: 0,
+        bearing: 0,
         layer: "station",
         source: undefined,
         layer: undefined,
@@ -42,7 +44,7 @@ export default class openindoor {
             icon_name: "icon"
         }
     }) {
-
+        // this.init_bearing = options.bearing;
         addMapDOM();
         console.log('options:', options);
         let { source, layer, bbox, building_id, level, feature_key, feature_id } = urlparser();
@@ -53,14 +55,24 @@ export default class openindoor {
         options.level = options.level || level;
         options.feature_key = options.feature_key || feature_key;
         options.feature_id = options.feature_id || feature_id;
+        options.bearing = options.bearing == null ? 0 : parseInt(options.bearing);
 
+        // console.log('options:', options);
+        let map_style = mapstyle({
+            source: options.source,
+            layer: options.layer
+        });
+        // console.log('map_style:', map_style);
         const map = new maplibregl.Map({
             'container': options.container,
             'center': options.center,
             'source': options.source,
             'state': options.state,
-            'info': undefined,
+            // 'info': undefined,
             'zoom': options.zoom,
+            'pitch': 0,
+            'bearing': 0,
+            'bearing': options.bearing,
             'style': mapstyle({
                 source: options.source,
                 layer: options.layer
@@ -84,7 +96,8 @@ export default class openindoor {
                 options.info_control,
                 options.mode_control,
                 options.search_keys,
-                options.search_filter
+                options.search_filter,
+                options.bearing
             );
             console.log('options.feature_key:', options.feature_key);
             console.log('options.feature_id:', options.feature_id);

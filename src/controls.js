@@ -1,5 +1,5 @@
 import MaplibreGeocoder from '@maplibre/maplibre-gl-geocoder';
-import '@maplibre/maplibre-gl-geocoder/dist/maplibre-gl-geocoder.css';
+// import '@maplibre/maplibre-gl-geocoder/dist/maplibre-gl-geocoder.css';
 import center from '@turf/center';
 import centroid from '@turf/centroid';
 
@@ -146,19 +146,44 @@ class FeedbackControl {
     }
 }
 
+class PathReset {
+    constructor() {
+        this.onclick = (e) => {};
+    }
 
+    onAdd(map) {
+        this._map = map;
+        let self = this;
 
-
+        this._resetButton = document.createElement("button");
+        this._resetButton.className = "maplibregl-ctrl-icon maplibregl-ctrl-path-reset";
+        this._resetButton.type = "button";
+        this._resetButton.disabled = false;
+        this._resetButton["aria-label"] = "Reset";
+        this._resetButton.onclick = function(e) {
+            // console.log("reset:", e);
+            self.onclick(e);
+        };
+        this._container = document.createElement("div");
+        this._container.className = 'maplibregl-ctrl-group maplibregl-ctrl';
+        this._container.appendChild(this._resetButton);
+        return this._container;
+    }
+    onRemove() {
+        this._container.parentNode.removeChild(this._container);
+        this._map = undefined;
+    }
+}
 
 class LevelControl {
     constructor({
-        bearing = -20,
+        // bearing = -20,
         pitch = 70,
         minpitchzoom = null,
         // up_action,
         // down_action,
     }) {
-        this._bearing = bearing;
+        // this._bearing = bearing;
         this._pitch = pitch;
         this._level_number = 0;
         this._levels = [this._level_number];
@@ -318,8 +343,12 @@ class LevelControl {
 
 
 class PitchToggle {
-    constructor({ bearing = -20, pitch = 70, minpitchzoom = null }) {
-        this._bearing = bearing;
+    constructor({
+        // bearing = -20,
+        pitch = 70,
+        // minpitchzoom = null
+    }) {
+        // this._bearing = bearing;
         this._pitch = pitch;
         // this._minpitchzoom = minpitchzoom;
     }
@@ -335,7 +364,10 @@ class PitchToggle {
         this._btn["aria-label"] = "Toggle Pitch";
         this._btn.onclick = function() {
             if (map.getPitch() === 0) {
-                let options = { pitch: self._pitch, bearing: self._bearing };
+                let options = {
+                    pitch: self._pitch,
+                    // bearing: self._bearing
+                };
                 // if (self._minpitchzoom && map.getZoom() > self._minpitchzoom) {
                 //     options.zoom = self._minpitchzoom;
                 // }
@@ -343,7 +375,10 @@ class PitchToggle {
                 self._btn.className =
                     "maplibregl-ctrl-icon maplibregl-ctrl-pitchtoggle-2d";
             } else {
-                map.easeTo({ pitch: 0, bearing: 0 });
+                map.easeTo({
+                    pitch: 0,
+                    // bearing: 0
+                });
                 self._btn.className =
                     "maplibregl-ctrl-icon maplibregl-ctrl-pitchtoggle-3d";
             }
@@ -493,6 +528,9 @@ class Controls {
     // machine.controls.set_on_building_event(() => {
     //     machine.setState(building)
     // })
+    set_path_reset_onclick(fn) {
+        this.path_reset.onclick = fn;
+    }
     set_on_building_button_pushed(e) {
         if (this.building_control != null) {
             this.building_control.set_on_button_pushed(e)
@@ -628,14 +666,6 @@ class Controls {
         this.map = map
             // this.machine = machine;
 
-        if (mode_control === "visible") {
-            this.building_control = new BuildingControl();
-            this.floor_control = new FloorControl();
-            this.indoor_control = new IndoorControl();
-            map.addControl(this.building_control, "top-left");
-            map.addControl(this.floor_control, "top-left");
-            map.addControl(this.indoor_control, "top-left");
-        }
 
         if (info_control === "visible") {
             this.info_control = new InfoControl();
@@ -799,14 +829,7 @@ class Controls {
 
         // this.enable_building_geocoder();
         // this.disable_indoor_geocoder();
-        map.addControl(this.geocoder, "top-right");
-
-
-        this.levelControl = new LevelControl({
-            minpitchzoom: 11,
-        })
-
-        // map.addControl(new PitchToggle({ minpitchzoom: 11 }), "top-left");
+        map.addControl(this.geocoder, "top-left");
 
         this.geolocate = new maplibregl.GeolocateControl({
             positionOptions: {
@@ -814,7 +837,28 @@ class Controls {
             },
             trackUserLocation: true
         });
-        map.addControl(this.geolocate);
+        map.addControl(this.geolocate, "top-left");
+
+        this.path_reset = new PathReset();
+        map.addControl(this.path_reset, "top-left");
+
+
+        if (mode_control === "visible") {
+            this.building_control = new BuildingControl();
+            this.floor_control = new FloorControl();
+            this.indoor_control = new IndoorControl();
+            map.addControl(this.building_control, "top-left");
+            map.addControl(this.floor_control, "top-left");
+            map.addControl(this.indoor_control, "top-left");
+        }
+
+        this.levelControl = new LevelControl({
+            minpitchzoom: 11,
+        })
+
+        // map.addControl(new PitchToggle({ minpitchzoom: 11 }), "top-left");
+
+
 
         if (feedback_control === "visible") {
             this.feedbackControl = new FeedbackControl({})

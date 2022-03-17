@@ -123,15 +123,15 @@ class Abstractmachine {
 class machine extends Abstractmachine {
 
     static singleton = undefined;
-    static get_singleton(map, modal, popup, routing, info, feedback_control, info_control, mode_control, search_keys, search_filter) {
+    static get_singleton(map, modal, popup, routing, info, feedback_control, info_control, mode_control, search_keys, search_filter, init_bearing) {
 
         if (machine.singleton === undefined)
-            machine.singleton = new machine(map, modal, popup, routing, info, feedback_control, info_control, mode_control, search_keys, search_filter);
+            machine.singleton = new machine(map, modal, popup, routing, info, feedback_control, info_control, mode_control, search_keys, search_filter, init_bearing);
         return machine.singleton;
     }
     static indoor_layers = JSON.parse(JSON.stringify(default_indoor_layers))
 
-    constructor(map, modal, popup, routing, info, feedback_control, info_control, mode_control, search_keys, search_filter) {
+    constructor(map, modal, popup, routing, info, feedback_control, info_control, mode_control, search_keys, search_filter, init_bearing) {
         super(map);
         this.modal = modal;
         this.popup = popup;
@@ -142,6 +142,7 @@ class machine extends Abstractmachine {
         this.pitch_old = map.getPitch();
         this.init_mode = "building_state";
         this.layer = "default";
+        this.init_bearing = init_bearing;
 
         machine.controls = new Controls(map, machine, feedback_control, info_control, mode_control, search_keys, search_filter);
         let self = this;
@@ -198,6 +199,15 @@ class machine extends Abstractmachine {
 
         routing.set_start_dragend(indoor_state.do_routing_start);
         routing.set_stop_dragend(indoor_state.do_routing_stop);
+
+        machine.controls.set_path_reset_onclick(
+            (e) => {
+                // console.log('path_reset:', e);
+                routing.reset();
+                machine.map.setBearing(this.init_bearing)
+                machine.map.setPitch(0);
+            }
+        );
     }
 
     static setLevel(level) {
@@ -785,10 +795,13 @@ class Building extends Abstractmachine {
             spinner.style.display = "block";
             spinner.style.visibility = "visible";
 
-            let my_geojson = fetch("https://overpass-api-world.openindoor.io/api/interpreter", {
-                method: 'POST',
-                body: request
-            }).then(function(response) {
+
+
+            let my_geojson = fetch("https://building-id.openindoor.io/" + building_id.substring(1)).then(function(response) {
+                // let my_geojson = fetch("https://overpass-api-world.openindoor.io/api/interpreter", {
+                //     method: 'POST',
+                //     body: request
+                // }).then(function(response) {
 
                 if (response.ok) {
                     return response.json();
@@ -1169,7 +1182,9 @@ class Indoor extends Abstractmachine {
             // var marker = new maplibregl.Marker()
             //     .setLngLat(route.get_start().geometry.coordinates)
             //     .addTo(machine.map);
-            self.display_info(features[0], coordinates);
+            if (features[0].properties != null && (features[0].properties.name != null || features[0].properties.ref != null)) {
+                self.display_info(features[0], coordinates);
+            }
         }
 
     }
@@ -1581,7 +1596,7 @@ spinner.addEventListener('click', function() {
 
 let spinner_marker = new maplibregl.Marker(spinner)
 
-function openindoor_machine(map, modal, popup, routing, info, feedback_control, info_control, mode_control, search_keys, search_filter) {
+function openindoor_machine(map, modal, popup, routing, info, feedback_control, info_control, mode_control, search_keys, search_filter, init_bearing) {
     console.log('machine.indoor_layers:', machine.indoor_layers)
     machine.map = map
     spinner_marker
@@ -1593,7 +1608,7 @@ function openindoor_machine(map, modal, popup, routing, info, feedback_control, 
     floor_state = new Floor(map);
     indoor_state = new Indoor(map);
 
-    openIndoorMachine = machine.get_singleton(map, modal, popup, routing, info, feedback_control, info_control, mode_control, search_keys, search_filter);
+    openIndoorMachine = machine.get_singleton(map, modal, popup, routing, info, feedback_control, info_control, mode_control, search_keys, search_filter, init_bearing);
 
     openIndoorMachine.do();
     return openIndoorMachine;
