@@ -108,13 +108,9 @@ module.exports = {
             directory: path.join(__dirname, 'public'),
         },
         compress: true,
-        allowedHosts: [
-            'app-dev.openindoor.io',
-            'app.openindoor.io',
-            'localhost',
-        ],
+        allowedHosts: 'all',
         hot: true,
-        port: 3020,
+        port: 3081,
         // headers: {
         //     "Access-Control-Allow-Origin": "*",
         //     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
