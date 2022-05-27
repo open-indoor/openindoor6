@@ -12,6 +12,6 @@ services:
     - ./webpack.config.js:/root/openindoor6/webpack.config.js
     - ./package.json:/root/openindoor6/package.json
     - ./public:/root/openindoor6/public
-    - ./.babel.rc:/root/openindoor6/.babel.rc
+    # - ./.babel.rc:/root/openindoor6/.babel.rc
     ports:
-    - 3000:3000
+    - 3020:3020

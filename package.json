@@ -3,16 +3,41 @@
     "version": "1.0.0",
     "description": "",
     "main": "dist/index_bundle.js",
+    "jest": {
+        "verbose": true,
+        "testEnvironment": "node"
+    },
+    "babel": {
+        "env": {
+            "test": {
+                "presets": [
+                    "@babel/preset-env"
+                ]
+            }
+        }
+    },
     "scripts": {
+        "test": "jest",
         "start": "node_modules/.bin/webpack serve --mode development --open --config webpack.config.js",
-        "start_": "webpack-dev-server --config ./webpack.config.js",
         "build": "webpack --config webpack.config.js --mode production"
     },
     "keywords": [],
     "author": "OpenIndoor",
     "license": "GPL-3.0-or-later",
+    "peerDependencies": {
+        "maplibre-gl": "2.1.6"
+    },
     "dependencies": {
-        "maplibre-gl": ">=1.15.2"
+        "@maplibre/maplibre-gl-geocoder": "1.2.0",
+        "@turf/turf": "",
+        "@xmldom/xmldom": "0.8.0",
+        "geojson": "",
+        "geojson-path-finder": "",
+        "opening_hours": "",
+        "osmtogeojson": "",
+        "tinyqueue": "^2.0.0",
+        "mapbox-gl-style-switcher": "",
+        "@mapbox/mapbox-gl-directions": ""
     },
     "devDependencies": {
         "@babel/core": "^7.15.8",
@@ -21,12 +46,15 @@
         "@webpack-cli/serve": "^1.6.0",
         "babel-loader": "^8.2.2",
         "css-loader": "^6.4.0",
-        "style-loader": "",
         "html-webpack-plugin": "^5.3.2",
+        "jest": "^27.3.1",
         "node-sass": "^6.0.1",
         "sass-loader": "^12.1.0",
+        "style-loader": "",
         "webpack": "^5.58.1",
         "webpack-cli": "^4.9.0",
-        "webpack-dev-server": "^4.3.1"
+        "webpack-dev-server": "^4.3.1",
+        "workbox-webpack-plugin": "^6.4.2",
+        "webpack-pwa-manifest": "^4.3.0"
     }
 }

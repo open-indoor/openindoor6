@@ -1,16 +1,85 @@
-<!-- src/index.html -->
 <!DOCTYPE html>
 <html lang="fr">
 
 <head>
-    <meta charset="UTF-8">
-    <title>OpenIndoor6</title>
-    <!-- <link rel="stylesheet" href="main.css"> -->
+    <meta charset="UTF-8" name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <meta name="description" content="OpenIndoor dev is an 3D indoor map exploration solution.">
+    <title>OpenIndoor app</title>
+    <!-- <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="white" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="apple-touch-icon" href="images/openindoor-icon-152.png">
+    <meta name="theme-color" content="white" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="app7">
+    <meta name="msapplication-TileImage" content="images/openindoor-icon-144.png">
+    <meta name="msapplication-TileColor" content="#FFFFFF"> -->
+
+    <script src="https://unpkg.com/maplibre-gl@2.1.9/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@2.1.9/dist/maplibre-gl.css" rel="stylesheet" />
+    <script src="https://unpkg.com/tinyqueue@2.0.0/tinyqueue.min.js"></script>
+
+    <script src="./openindoor.js"></script>
+
 </head>
 
 <body>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9EL9WFDWSD"></script>
+    <div id="map"></div>
+    <script>
+        window.dataLayer = window.dataLayer || [];
 
-    <!-- <script src="main.js"></script> -->
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+        gtag('js', new Date());
+
+        gtag('config', 'G-9EL9WFDWSD');
+        // navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        //     for (let registration of registrations) {
+        //         registration.unregister()
+        //     }
+        // })
+        let my_openindoor = new openindoor({
+            container: 'map',
+            info_control: "none",
+            feedback_control: "none",
+            layers: [{
+                title: "default",
+                indoor: {
+                    url: "./layer/indoor-newstyle.json"
+                },
+                building: {
+                    url: "./layer/building-automn.json"
+                }
+            }, {
+                title: "emergency",
+                indoor: {
+                    url: "./layer/indoor-emergency.json"
+                },
+                building: {
+                    url: "./layer/building-emergency.json"
+                }
+            }, {
+                title: "older",
+                indoor: {
+                    url: "./layer/indoor-default.json"
+                },
+                building: {
+                    url: "./layer/building-primary.json"
+                }
+            }],
+        });
+        // window.onload = () => {
+        //     'use strict';
+        //     if ('serviceWorker' in navigator) {
+        //         navigator.serviceWorker
+        //             .register('./sw.js');
+        //     }
+        // }
+    </script>
 </body>
 
 </html>
