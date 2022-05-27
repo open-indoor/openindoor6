@@ -10,7 +10,7 @@ import mapstyle from "./mapstyle"
 import urlparser from "./urlparser"
 import load_data from "./load_data"
 import openindoor_machine from "./openindoor_machine"
-import avatar from "./avatar"
+// import avatar from "./avatar"
 import oid_modal from "./oid_modal"
 import oid_popup from "./oid_popup"
 import oid_routing from './oid_routing';
