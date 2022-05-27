@@ -5,6 +5,7 @@ import pins_layers from './layers/pins.json';
 import shape_layers from './layers/shape.json';
 import indoor_layers from './layers/indoor.json';
 
+<<<<<<< HEAD
 class mapstyle {
     // constructor() {
 
@@ -19,6 +20,66 @@ class mapstyle {
         //  https://gateway.openindoor.io/mvt/footprint
 
         let sources = {
+=======
+function mapstyle(options = {
+    source: undefined,
+    layer: undefined
+}) {
+    let sources = {
+        "raster-tiles": {
+            "type": "raster",
+            "tiles": [
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+            ],
+            "tileSize": 256,
+            "minzoom": 0,
+            "maxzoom": 19
+        },
+        "footprint": {
+            "type": "vector",
+            "tiles": [
+                "https://tegola.openindoor.io/maps/openindoor/footprint/{z}/{x}/{y}.vector.pbf?token=kjGxKVMZcXAao1mtOOALxWY3",
+            ],
+            // "promoteId": "osm_id",
+            "minzoom": 12,
+            "maxzoom": 20,
+            "attribution": "OpenIndoor / OpenStreetMap / Maplibre"
+        },
+        "pins": {
+            "type": "vector",
+            "tiles": [
+                "https://tegola.openindoor.io/maps/openindoor/pins/{z}/{x}/{y}.vector.pbf?token=kjGxKVMZcXAao1mtOOALxWY3"
+            ],
+            "minzoom": 0,
+            "maxzoom": 20
+        },
+        "shape_source": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": []
+            },
+            "generateId": true,
+        },
+        "indoor_source": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": []
+            },
+            "generateId": true,
+        },
+        "selection": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features": []
+            }
+        },
+    };
+    if (options.source != null) {
+        sources = {
+>>>>>>> e9c673fe3db22337a29e8db58aa82a9447039019
             "raster-tiles": {
                 "type": "raster",
                 "tiles": [
@@ -29,6 +90,7 @@ class mapstyle {
                 "maxzoom": 19
             },
             "footprint": {
+<<<<<<< HEAD
                 "type": "vector",
                 "tiles": [
                     // "https://gateway.openindoor.io/mvt/footprint/{z}/{x}/{y}.vector.pbf?token=kjGxKVMZcXAao1mtOOALxWY3",
@@ -56,6 +118,22 @@ class mapstyle {
                 ],
                 "minzoom": 1,
                 "maxzoom": 15
+=======
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": []
+                },
+                "generateId": true,
+            },
+            "pins": {
+                "type": "geojson",
+                "data": {
+                    "type": "FeatureCollection",
+                    "features": []
+                },
+                "generateId": true,
+>>>>>>> e9c673fe3db22337a29e8db58aa82a9447039019
             },
             "shape_source": {
                 "type": "geojson",
@@ -80,6 +158,7 @@ class mapstyle {
                     "features": []
                 }
             },
+<<<<<<< HEAD
         };
         console.log('options.source:', options.source);
         if (options.source != null) {
@@ -138,10 +217,25 @@ class mapstyle {
         //     mapstyle.custom_style = true
         // }
         let layers = [
+=======
+        }
+    }
+    let layers = [
+        ...background_layers,
+        ...raster_layers,
+        ...footprint_layers,
+        ...pins_layers,
+        ...shape_layers,
+        ...indoor_layers,
+    ];
+    if (options.layer != null) {
+        layers = [
+>>>>>>> e9c673fe3db22337a29e8db58aa82a9447039019
             ...background_layers,
             ...raster_layers,
             ...pins_layers,
             ...shape_layers,
+<<<<<<< HEAD
             ...(options.layers != null && options.layers.indoor != null) ? [] : indoor_layers,
             ...(options.layers != null && options.layers.building != null) ? [] : footprint_layers,
         ]
@@ -244,3 +338,31 @@ class mapstyle {
 }
 
 export default mapstyle;
+=======
+        ]
+    }
+
+    return {
+        "version": 8,
+        "transition": {
+            "duration": 300,
+            "delay": 0
+        },
+        "name": "Blank",
+        "center": [0, 0],
+        "zoom": 0,
+        "light": {
+            "anchor": "map",
+            "color": "white",
+            "intensity": 0.4,
+            "position": [1.15, 210, 30]
+        },
+        "sources": sources,
+        "sprite": "https://open-indoor.github.io/sprite_2/sprite",
+        "glyphs": "https://open-indoor.github.io/fonts/{fontstack}/{range}.pbf",
+        "layers": layers,
+        "id": "blank"
+    }
+}
+export default mapstyle
+>>>>>>> e9c673fe3db22337a29e8db58aa82a9447039019

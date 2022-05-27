@@ -1,0 +1,99 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<osm version='0.6' generator='JOSM'>
+  <node id='-106021' action='modify' visible='true' lat='42.98415589595' lon='0.66932111844' />
+  <node id='-106022' action='modify' visible='true' lat='42.98423438187' lon='0.66956251726' />
+  <node id='-106023' action='modify' visible='true' lat='42.98418313341' lon='0.669593653' />
+  <node id='-106024' action='modify' visible='true' lat='42.98410464743' lon='0.66935225419' />
+  <node id='-106029' action='modify' visible='true' lat='42.98415589595' lon='0.66932111844' />
+  <node id='-106030' action='modify' visible='true' lat='42.98423438187' lon='0.66956251726' />
+  <node id='-106031' action='modify' visible='true' lat='42.98418313341' lon='0.669593653' />
+  <node id='-106032' action='modify' visible='true' lat='42.98410464743' lon='0.66935225419' />
+  <node id='-106038' action='modify' visible='true' lat='42.98415589595' lon='0.66932111844' />
+  <node id='-106039' action='modify' visible='true' lat='42.98423438187' lon='0.66956251726' />
+  <node id='-106040' action='modify' visible='true' lat='42.98418313341' lon='0.669593653' />
+  <node id='-106041' action='modify' visible='true' lat='42.98410464743' lon='0.66935225419' />
+  <node id='-106042' action='modify' visible='true' lat='42.98416723394' lon='0.66954475108' />
+  <node id='-106043' action='modify' visible='true' lat='42.98421848241' lon='0.66951361533' />
+  <node id='-106044' action='modify' visible='true' lat='42.9841243903' lon='0.66941297719' />
+  <node id='-106045' action='modify' visible='true' lat='42.98417563881' lon='0.66938184144' />
+  <node id='-106073' action='modify' visible='true' lat='42.98415589595' lon='0.66932111844' />
+  <node id='-106074' action='modify' visible='true' lat='42.98417563881' lon='0.66938184144' />
+  <node id='-106075' action='modify' visible='true' lat='42.98421848241' lon='0.66951361533' />
+  <node id='-106076' action='modify' visible='true' lat='42.98423438187' lon='0.66956251726' />
+  <node id='-106077' action='modify' visible='true' lat='42.98418313341' lon='0.669593653' />
+  <node id='-106078' action='modify' visible='true' lat='42.98416723394' lon='0.66954475108' />
+  <node id='-106079' action='modify' visible='true' lat='42.9841243903' lon='0.66941297719' />
+  <node id='-106080' action='modify' visible='true' lat='42.98410464743' lon='0.66935225419' />
+  <way id='-103190' action='modify' visible='true'>
+    <nd ref='-106021' />
+    <nd ref='-106045' />
+    <nd ref='-106043' />
+    <nd ref='-106022' />
+    <nd ref='-106023' />
+    <nd ref='-106042' />
+    <nd ref='-106044' />
+    <nd ref='-106024' />
+    <nd ref='-106021' />
+    <tag k='indoor' v='area' />
+    <tag k='level' v='1' />
+  </way>
+  <way id='-103244' action='modify' visible='true'>
+    <nd ref='-106029' />
+    <nd ref='-106045' />
+    <nd ref='-106043' />
+    <nd ref='-106030' />
+    <nd ref='-106031' />
+    <nd ref='-106042' />
+    <nd ref='-106044' />
+    <nd ref='-106032' />
+    <nd ref='-106029' />
+    <tag k='building' v='yes' />
+    <tag k='height' v='8' />
+  </way>
+  <way id='-103302' action='modify' visible='true'>
+    <nd ref='-106038' />
+    <nd ref='-106045' />
+    <nd ref='-106043' />
+    <nd ref='-106039' />
+    <nd ref='-106040' />
+    <nd ref='-106042' />
+    <nd ref='-106044' />
+    <nd ref='-106041' />
+    <nd ref='-106038' />
+    <tag k='indoor' v='room' />
+    <tag k='level' v='2' />
+  </way>
+  <way id='-103310' action='modify' visible='true'>
+    <nd ref='-106022' />
+    <nd ref='-106023' />
+    <nd ref='-106042' />
+    <nd ref='-106043' />
+    <nd ref='-106022' />
+    <tag k='indoor' v='room' />
+    <tag k='level' v='2' />
+    <tag k='name' v='kid room' />
+  </way>
+  <way id='-103320' action='modify' visible='true'>
+    <nd ref='-106021' />
+    <nd ref='-106024' />
+    <nd ref='-106044' />
+    <nd ref='-106045' />
+    <nd ref='-106021' />
+    <tag k='indoor' v='room' />
+    <tag k='level' v='2' />
+    <tag k='name' v='parent room' />
+  </way>
+  <way id='-103438' action='modify' visible='true'>
+    <nd ref='-106073' />
+    <nd ref='-106074' />
+    <nd ref='-106075' />
+    <nd ref='-106076' />
+    <nd ref='-106077' />
+    <nd ref='-106078' />
+    <nd ref='-106079' />
+    <nd ref='-106080' />
+    <nd ref='-106073' />
+    <tag k='indoor' v='area' />
+    <tag k='level' v='0' />
+  </way>
+</osm>
