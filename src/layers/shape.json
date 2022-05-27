@@ -1,0 +1,94 @@
+[{
+    "id": "shape-area-extrusion-indoor-00",
+    "source": "shape_source",
+    "type": "fill-extrusion",
+    "minzoom": 15,
+    "maxzoom": 24,
+    "visibility": "visible",
+    "filter": [
+        "any", [
+            "has",
+            "building"
+        ],
+        [
+            "has",
+            "indoor"
+        ]
+    ],
+    "paint": {
+        "fill-extrusion-color": [
+            "case", [
+                "==", [
+                    "feature-state",
+                    "hover"
+                ],
+                null
+            ],
+            [
+                "match", ["%", ["+", 400, [
+                    "get",
+                    "min_level"
+                ]], 4],
+                0, "#ea4234",
+                1, "#fabc05",
+                2, "#34a853",
+                "#4286f4"
+            ],
+            [
+                "boolean", [
+                    "feature-state",
+                    "hover"
+                ]
+            ],
+            "#ffffff", [
+                "match", ["%", ["+", 400, [
+                    "get",
+                    "min_level"
+                ]], 4],
+                0, "#ea4234",
+                1, "#fabc05",
+                2, "#34a853",
+                "#4286f4"
+            ]
+        ],
+        "fill-extrusion-height": [
+            "+",
+            4.5, [
+                "*",
+                5, ["+", [
+                        "get",
+                        "gap_level"
+                    ],
+                    [
+                        "get",
+                        "max_level"
+                    ]
+                ]
+            ]
+        ],
+        "fill-extrusion-base": [
+            "*",
+            5, ["+", [
+                    "get",
+                    "gap_level"
+                ],
+                [
+                    "get",
+                    "min_level"
+                ]
+            ]
+        ],
+        "fill-extrusion-opacity": [
+            "interpolate", [
+                "linear"
+            ],
+            [
+                "zoom"
+            ],
+            15.5,
+            0,
+            16.5,
+            0.5
+        ]
+    }
+}]

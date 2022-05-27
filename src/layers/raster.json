@@ -1,0 +1,8 @@
+[{
+    "id": "simple-tiles",
+    "type": "raster",
+    "source": "raster-tiles",
+    "paint": {
+        "raster-opacity": 1
+    }
+}]

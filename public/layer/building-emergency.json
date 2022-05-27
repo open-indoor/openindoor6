@@ -1,0 +1,105 @@
+[{
+    "id": "building-footprint",
+    "source": "footprint",
+    "source-layer": "footprint",
+    "type": "fill-extrusion",
+    "filter": [
+        "all", ["!=", ["get", "osm_id"], 0]
+    ],
+    "layout": {
+        "visibility": "visible"
+    },
+    "paint": {
+        "fill-extrusion-height": [
+            "case", [
+                "has",
+                "building:levels"
+            ],
+            [
+                "*",
+                5, [
+                    "to-number", [
+                        "get",
+                        "building:levels"
+                    ]
+                ]
+            ],
+            10
+        ],
+        "fill-extrusion-base": 0,
+        "fill-extrusion-opacity": 0.8,
+        "fill-extrusion-color": [
+            "case", [
+                "==", [
+                    "feature-state",
+                    "click"
+                ],
+                null
+            ],
+            [
+                "case", [
+                    "==", [
+                        "feature-state",
+                        "hover"
+                    ],
+                    null
+                ],
+                [
+                    "match", ["%", ["to-number", ["slice", ["get", "osm_id"], 1]], 4],
+                    0, "#ED8A4A",
+                    1, "#F7774D",
+                    2, "#F75464",
+                    "#E15F51"
+                ],
+                [
+                    "boolean", [
+                        "feature-state",
+                        "hover"
+                    ]
+                ],
+                "white", [
+                    "match", ["%", ["to-number", ["slice", ["get", "osm_id"], 1]], 4],
+                    0, "#ED8A4A",
+                    1, "#F7774D",
+                    2, "#F75464",
+                    "#E15F51"
+                ]
+            ],
+            [
+                "boolean", [
+                    "feature-state",
+                    "click"
+                ]
+            ],
+            "black", [
+                "case", [
+                    "==", [
+                        "feature-state",
+                        "hover"
+                    ],
+                    null
+                ],
+                [
+                    "match", ["%", ["to-number", ["slice", ["get", "osm_id"], 1]], 4],
+                    0, "#ED8A4A",
+                    1, "#F7774D",
+                    2, "#F75464",
+                    "#E15F51"
+                ],
+                [
+                    "boolean", [
+                        "feature-state",
+                        "hover"
+                    ]
+                ],
+                "white", [
+                    "match", ["%", ["to-number", ["slice", ["get", "osm_id"], 1]], 4],
+                    0, "#ED8A4A",
+                    1, "#F7774D",
+                    2, "#F75464",
+                    "#E15F51"
+                ]
+            ]
+        ]
+    }
+}]
