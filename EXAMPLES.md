@@ -1,6 +1,6 @@
 Here is a very simple example to get first results.
 
-Have a look at [geojson file](examples/house.geojson.md) or [.osm file](exmples/house.osm) to get examples.
+Have a look at [geojson file](examples/house.geojson) or [.osm file](examples/house.osm) to get examples.
 
 Here is the basic rendenring:
 
